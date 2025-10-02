@@ -1,0 +1,244 @@
+{% extends 'medical/base.html' %}
+{% load static %}
+
+{% block title %}Modifier Utilisateur - {{ user.get_full_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #2196f3;
+    }
+    .form-section h3 {
+        color: #1976d2;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+    .required-field::after {
+        content: " *";
+        color: #f44336;
+    }
+    .form-control, .form-select {
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        padding: 0.75rem;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #2196f3;
+        box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.25);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-user-edit me-2"></i>Modifier l'utilisateur
+        </h1>
+        <div>
+            <a href="{% url 'view_user' user.id %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Retour aux détails
+            </a>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xl-10">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-user-cog me-2"></i>Modification de {{ user.get_full_name|default:user.username }}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Informations de connexion -->
+                        <div class="form-section">
+                            <h3><i class="fas fa-key"></i> Informations de connexion</h3>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="id_username" class="form-label required-field">Nom d'utilisateur</label>
+                                    {{ form.username }}
+                                    {% if form.username.errors %}
+                                        <div class="text-danger">{{ form.username.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="id_email" class="form-label required-field">Email</label>
+                                    {{ form.email }}
+                                    {% if form.email.errors %}
+                                        <div class="text-danger">{{ form.email.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <label for="id_password1" class="form-label">Nouveau mot de passe</label>
+                                    {{ form.password1 }}
+                                    <small class="text-muted">Laissez vide pour conserver le mot de passe actuel</small>
+                                    {% if form.password1.errors %}
+                                        <div class="text-danger">{{ form.password1.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="id_password2" class="form-label">Confirmation</label>
+                                    {{ form.password2 }}
+                                    {% if form.password2.errors %}
+                                        <div class="text-danger">{{ form.password2.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Informations personnelles -->
+                        <div class="form-section">
+                            <h3><i class="fas fa-user"></i> Informations personnelles</h3>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="id_first_name" class="form-label required-field">Prénom</label>
+                                    {{ form.first_name }}
+                                    {% if form.first_name.errors %}
+                                        <div class="text-danger">{{ form.first_name.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="id_last_name" class="form-label required-field">Nom</label>
+                                    {{ form.last_name }}
+                                    {% if form.last_name.errors %}
+                                        <div class="text-danger">{{ form.last_name.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <label for="id_phone" class="form-label">Téléphone</label>
+                                    {{ form.phone }}
+                                    {% if form.phone.errors %}
+                                        <div class="text-danger">{{ form.phone.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="id_department" class="form-label">Département</label>
+                                    {{ form.department }}
+                                    {% if form.department.errors %}
+                                        <div class="text-danger">{{ form.department.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Rôle et permissions -->
+                        <div class="form-section">
+                            <h3><i class="fas fa-user-tag"></i> Rôle et permissions</h3>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="id_role" class="form-label required-field">Rôle</label>
+                                    {{ form.role }}
+                                    {% if form.role.errors %}
+                                        <div class="text-danger">{{ form.role.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Statut et permissions -->
+                        <div class="form-section">
+                            <h3><i class="fas fa-cogs"></i> Statut et permissions</h3>
+                            
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-check form-switch mb-3">
+                                        {{ form.is_active }}
+                                        <label class="form-check-label" for="id_is_active">
+                                            <i class="fas fa-user-check me-2"></i>Utilisateur actif
+                                        </label>
+                                        <small class="text-muted d-block">L'utilisateur peut se connecter</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="form-check form-switch mb-3">
+                                        {{ form.is_staff }}
+                                        <label class="form-check-label" for="id_is_staff">
+                                            <i class="fas fa-user-shield me-2"></i>Accès administration
+                                        </label>
+                                        <small class="text-muted d-block">Accès à l'interface d'administration</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="form-check form-switch mb-3">
+                                        {{ form.is_superuser }}
+                                        <label class="form-check-label" for="id_is_superuser">
+                                            <i class="fas fa-crown me-2"></i>Super utilisateur
+                                        </label>
+                                        <small class="text-muted d-block">Toutes les permissions</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Informations sur les permissions -->
+                            <div class="alert alert-info mt-3">
+                                <h6><i class="fas fa-info-circle me-2"></i>Informations sur les permissions :</h6>
+                                <ul class="mb-0">
+                                    <li><strong>Actif :</strong> L'utilisateur peut se connecter au système</li>
+                                    <li><strong>Staff :</strong> Accès à l'interface d'administration Django</li>
+                                    <li><strong>Super utilisateur :</strong> Toutes les permissions sans restriction</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- Boutons d'action -->
+                        <div class="d-flex justify-content-end mt-4">
+                            <a href="{% url 'view_user' user.id %}" class="btn btn-secondary me-3">
+                                <i class="fas fa-times"></i> Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Enregistrer les modifications
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-update permissions based on role
+document.getElementById('id_role').addEventListener('change', function() {
+    const role = this.value;
+    const isStaffCheckbox = document.getElementById('id_is_staff');
+    const isSuperuserCheckbox = document.getElementById('id_is_superuser');
+    
+    // Reset permissions
+    isStaffCheckbox.checked = false;
+    isSuperuserCheckbox.checked = false;
+    
+    // Set permissions based on role
+    if (role === 'admin') {
+        isStaffCheckbox.checked = true;
+        isSuperuserCheckbox.checked = true;
+    } else if (role === 'doctor' || role === 'nurse') {
+        isStaffCheckbox.checked = true;
+    }
+});
+</script>
+{% endblock %}
+

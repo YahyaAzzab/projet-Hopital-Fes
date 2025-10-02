@@ -1,0 +1,332 @@
+{% extends 'medical/base.html' %}
+{% load static %}
+
+{% block title %}Nouveau Rapport{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<style>
+    .form-section {
+        background: #fff;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-left: 4px solid #007bff;
+    }
+    
+    .form-section h3 {
+        color: #007bff;
+        margin-bottom: 20px;
+        font-size: 1.3em;
+        display: flex;
+        align-items: center;
+    }
+    
+    .form-section h3 i {
+        margin-right: 10px;
+        font-size: 1.2em;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+        display: block;
+    }
+    
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 12px 15px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        margin-right: 10px;
+    }
+    
+    .alert {
+        border-radius: 8px;
+        border: none;
+        padding: 15px 20px;
+    }
+    
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-file-medical"></i> Nouveau Rapport</h2>
+                <a href="{% url 'reports' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour aux Rapports
+                </a>
+            </div>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <!-- Informations de base -->
+                <div class="form-section">
+                    <h3><i class="fas fa-info-circle"></i> Informations de base</h3>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id_title" class="required-field">Titre du rapport</label>
+                                {{ form.title }}
+                                {% if form.title.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.title.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id_report_type" class="required-field">Type de rapport</label>
+                                {{ form.report_type }}
+                                {% if form.report_type.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.report_type.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id_patient" class="required-field">Patient</label>
+                                {{ form.patient }}
+                                {% if form.patient.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.patient.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id_doctor">Médecin responsable</label>
+                                {{ form.doctor }}
+                                {% if form.doctor.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.doctor.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contenu du rapport -->
+                <div class="form-section">
+                    <h3><i class="fas fa-file-alt"></i> Contenu du rapport</h3>
+                    
+                    <div class="form-group">
+                        <label for="id_summary" class="required-field">Résumé</label>
+                        {{ form.summary }}
+                        {% if form.summary.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.summary.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_details">Détails</label>
+                        {{ form.details }}
+                        {% if form.details.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.details.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Diagnostic et traitement -->
+                <div class="form-section">
+                    <h3><i class="fas fa-stethoscope"></i> Diagnostic et traitement</h3>
+                    
+                    <div class="form-group">
+                        <label for="id_diagnosis">Diagnostic</label>
+                        {{ form.diagnosis }}
+                        {% if form.diagnosis.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.diagnosis.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_treatment">Traitement</label>
+                        {{ form.treatment }}
+                        {% if form.treatment.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.treatment.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Statut et priorité -->
+                <div class="form-section">
+                    <h3><i class="fas fa-flag"></i> Statut et priorité</h3>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="id_priority">Priorité</label>
+                                {{ form.priority }}
+                                {% if form.priority.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.priority.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="id_status">Statut</label>
+                                {{ form.status }}
+                                {% if form.status.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.status.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="id_report_date">Date du rapport</label>
+                                {{ form.report_date }}
+                                {% if form.report_date.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.report_date.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Boutons d'action -->
+                <div class="d-flex justify-content-end mt-4">
+                    <a href="{% url 'reports' %}" class="btn btn-secondary me-3">
+                        <i class="fas fa-times"></i> Annuler
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Créer le Rapport
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validation côté client
+    const form = document.querySelector('.needs-validation');
+    form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    });
+    
+    // Auto-remplissage de la date actuelle
+    const reportDateField = document.getElementById('id_report_date');
+    if (reportDateField && !reportDateField.value) {
+        const today = new Date().toISOString().split('T')[0];
+        reportDateField.value = today;
+    }
+    
+    // Auto-remplissage du médecin avec l'utilisateur connecté
+    const doctorField = document.getElementById('id_doctor');
+    if (doctorField && !doctorField.value) {
+        // Récupérer l'ID de l'utilisateur connecté depuis le contexte Django
+        // Cette partie nécessiterait une modification de la vue pour passer l'ID
+    }
+});
+</script>
+{% endblock %}
+
+

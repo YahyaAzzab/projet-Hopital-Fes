@@ -1,0 +1,254 @@
+{% extends 'medical/base.html' %}
+{% load static %}
+
+{% block title %}Activités Infirmières - Hôpital EL GHASSANI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .activity-card {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        margin-bottom: 1rem;
+    }
+    
+    .activity-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    }
+    
+    .activity-status {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .status-completed {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        color: white;
+    }
+    
+    .status-pending {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        color: white;
+    }
+    
+    .status-in_progress {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .priority-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .priority-normal {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+    
+    .priority-high {
+        background: #fff3e0;
+        color: #f57c00;
+    }
+    
+    .priority-urgent {
+        background: #ffebee;
+        color: #d32f2f;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+    }
+    
+    .activity-type-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        margin-right: 1rem;
+    }
+    
+    .icon-soins {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
+    
+    .icon-surveillance {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-clipboard-list me-2"></i>Activités Infirmières
+        </h1>
+        <div class="text-muted">
+            <i class="fas fa-clock me-1"></i>
+            {{ "now"|date:"d/m/Y à H:i" }}
+        </div>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="stats-card">
+                <h4 class="mb-1">{{ stats.total_activities }}</h4>
+                <small>Total Activités</small>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card">
+                <h4 class="mb-1">{{ stats.completed }}</h4>
+                <small>Terminées</small>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card">
+                <h4 class="mb-1">{{ stats.pending }}</h4>
+                <small>En Attente</small>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card">
+                <h4 class="mb-1">{{ stats.urgent }}</h4>
+                <small>Urgentes</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des activités -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-tasks me-2"></i>Planning des Activités
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% for activity in activities %}
+                    <div class="card activity-card">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-1">
+                                    <div class="activity-type-icon {% if activity.type == 'Soins' %}icon-soins{% else %}icon-surveillance{% endif %}">
+                                        {% if activity.type == 'Soins' %}
+                                        <i class="fas fa-user-md"></i>
+                                        {% else %}
+                                        <i class="fas fa-heartbeat"></i>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="mb-1">{{ activity.title }}</h6>
+                                    <p class="text-muted mb-0">{{ activity.description }}</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-user me-1"></i>{{ activity.patient }}
+                                    </small>
+                                </div>
+                                <div class="col-md-2">
+                                    <span class="activity-status status-{{ activity.status }}">
+                                        {% if activity.status == 'completed' %}Terminé
+                                        {% elif activity.status == 'pending' %}En Attente
+                                        {% elif activity.status == 'in_progress' %}En Cours
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="col-md-2">
+                                    <span class="priority-badge priority-{{ activity.priority }}">
+                                        {% if activity.priority == 'normal' %}Normale
+                                        {% elif activity.priority == 'high' %}Élevée
+                                        {% elif activity.priority == 'urgent' %}Urgente
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="text-center">
+                                        <div class="h5 mb-0 text-primary">{{ activity.time }}</div>
+                                        <small class="text-muted">Heure prévue</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    {% if activity.status == 'pending' %}
+                                    <button class="btn btn-sm btn-success" onclick="startActivity({{ activity.id }})">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                    {% elif activity.status == 'in_progress' %}
+                                    <button class="btn btn-sm btn-primary" onclick="completeActivity({{ activity.id }})">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    {% elif activity.status == 'completed' %}
+                                    <span class="text-success">
+                                        <i class="fas fa-check-circle fa-2x"></i>
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function startActivity(activityId) {
+    if (confirm('Démarrer cette activité ?')) {
+        showNotification('Activité démarrée', 'fas fa-play', 'success');
+        // Simuler le démarrage
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    }
+}
+
+function completeActivity(activityId) {
+    if (confirm('Marquer cette activité comme terminée ?')) {
+        showNotification('Activité terminée', 'fas fa-check', 'success');
+        // Simuler la completion
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    }
+}
+
+function showNotification(message, icon, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'info'} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        <i class="${icon} me-2"></i>${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 3000);
+}
+</script>
+{% endblock %}

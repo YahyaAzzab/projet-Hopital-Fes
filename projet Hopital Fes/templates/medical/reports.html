@@ -1,0 +1,138 @@
+{% extends 'medical/base.html' %}
+{% load static %}
+
+{% block title %}Rapports - Hôpital EL GHASSANI{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-chart-line me-2"></i>Gestion des Rapports
+                </h6>
+                <a href="{% url 'report_add' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Nouveau Rapport
+                </a>
+            </div>
+            <div class="card-body">
+                <!-- Search and Filters -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="searchReports" placeholder="Rechercher un rapport...">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="statusFilter">
+                            <option value="">Tous les statuts</option>
+                            <option value="completed">Terminé</option>
+                            <option value="pending">En attente</option>
+                            <option value="draft">Brouillon</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-secondary w-100" onclick="exportReports()">
+                            <i class="fas fa-download me-2"></i>Exporter
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Reports List -->
+                <div class="table-responsive">
+                    <table class="table table-hover" id="reportsTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Titre</th>
+                                <th>Patient</th>
+                                <th>Type</th>
+                                <th>Date</th>
+                                <th>Statut</th>
+                                <th>Médecin</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for report in reports %}
+                            <tr>
+                                <td>
+                                    <div class="fw-bold">{{ report.title }}</div>
+                                    <small class="text-muted">{{ report.summary|truncatechars:50 }}</small>
+                                </td>
+                                <td>{{ report.patient.get_full_name }}</td>
+                                <td>
+                                    <span class="badge bg-info">{{ report.get_report_type_display }}</span>
+                                </td>
+                                <td>{{ report.report_date|date:"d/m/Y" }}</td>
+                                <td>
+                                    <span class="badge bg-{% if report.status == 'completed' %}success{% elif report.status == 'pending' %}warning{% else %}secondary{% endif %}">
+                                        {{ report.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>{{ report.doctor.get_full_name|default:"-" }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="viewReport({{ report.id }})">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-warning" onclick="editReport({{ report.id }})">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteReport({{ report.id }})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-4">
+                                    <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">Aucun rapport trouvé</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function viewReport(id) {
+    console.log('View report:', id);
+}
+
+function editReport(id) {
+    console.log('Edit report:', id);
+}
+
+function deleteReport(id) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce rapport ?')) {
+        console.log('Delete report:', id);
+    }
+}
+
+function exportReports() {
+    console.log('Export reports');
+}
+
+// Search functionality
+document.getElementById('searchReports').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#reportsTable tbody tr');
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+});
+</script>
+{% endblock %}

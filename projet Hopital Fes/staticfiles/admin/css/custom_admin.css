@@ -1,0 +1,166 @@
+/* Style personnalisé pour l'administration des patients */
+
+/* Amélioration des fieldsets */
+.fieldset {
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.fieldset h2 {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    padding: 12px 15px;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.fieldset .description {
+    background-color: #f8f9fa;
+    padding: 8px 15px;
+    margin: 0;
+    font-size: 12px;
+    color: #6c757d;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* Amélioration des champs requis */
+.required label {
+    font-weight: bold;
+    color: #495057;
+}
+
+.required label:after {
+    content: " *";
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* Amélioration des textarea */
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Amélioration des select */
+select {
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+}
+
+/* Amélioration des inputs */
+input[type="text"], input[type="email"], input[type="tel"], input[type="date"] {
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+input[type="text"]:focus, input[type="email"]:focus, input[type="tel"]:focus, input[type="date"]:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Style pour les erreurs de validation */
+.errorlist {
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* Amélioration de la liste des patients */
+.results {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.results th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+}
+
+.results tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Style pour les icônes dans les titres */
+.fieldset h2::before {
+    margin-right: 8px;
+}
+
+/* Amélioration des filtres */
+.filtered {
+    background-color: #e3f2fd;
+}
+
+/* Style pour les messages */
+.messagelist {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.messagelist .success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.messagelist .error {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+/* Amélioration des boutons */
+.default, input[type="submit"], input[type="button"], .button {
+    background-color: #007bff;
+    border-color: #007bff;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-weight: 500;
+    transition: all 0.15s ease-in-out;
+}
+
+.default:hover, input[type="submit"]:hover, input[type="button"]:hover, .button:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Style pour les groupes de champs */
+.form-row {
+    margin-bottom: 15px;
+}
+
+.form-row .field {
+    margin-bottom: 10px;
+}
+
+/* Amélioration des help texts */
+.help {
+    font-size: 11px;
+    color: #6c757d;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+/* Style responsive */
+@media (max-width: 768px) {
+    .fieldset h2 {
+        font-size: 12px;
+        padding: 10px 12px;
+    }
+    
+    .form-row {
+        margin-bottom: 10px;
+    }
+}
+
+

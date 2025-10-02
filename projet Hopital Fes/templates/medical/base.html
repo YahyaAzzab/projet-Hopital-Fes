@@ -1,0 +1,710 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Hôpital EL GHASSANI - Plateforme de Digitalisation Médicale{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/modern-design.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if user.is_authenticated %}
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{% url 'dashboard' %}">
+                    <i class="fas fa-hospital me-2"></i>
+                    Hôpital EL GHASSANI
+                </a>
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
+                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                            </a>
+                        </li>
+                        <!-- Navigation pour technicien -->
+                        {% if user.role == 'technician' %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'messages' %}active{% endif %}" href="{% url 'messages' %}">
+                                <i class="fas fa-envelope me-1"></i>Messages
+                                <span class="badge bg-danger ms-1" id="unread-messages-badge" style="display: none;">0</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'system_logs' %}active{% endif %}" href="{% url 'system_logs' %}">
+                                <i class="fas fa-clipboard-list me-1"></i>Logs Système
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'system_monitor' %}active{% endif %}" href="{% url 'system_monitor' %}">
+                                <i class="fas fa-heartbeat me-1"></i>Monitoring
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'backup_restore' %}active{% endif %}" href="{% url 'backup_restore' %}">
+                                <i class="fas fa-database me-1"></i>Sauvegarde
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'maintenance' %}active{% endif %}" href="{% url 'maintenance' %}">
+                                <i class="fas fa-tools me-1"></i>Maintenance
+                            </a>
+                        </li>
+                        {% elif user.role == 'nurse' %}
+                        <!-- Navigation pour infirmier -->
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'patients' %}active{% endif %}" href="{% url 'patients' %}">
+                                <i class="fas fa-users me-1"></i>Patients
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'documents' %}active{% endif %}" href="{% url 'documents' %}">
+                                <i class="fas fa-file-medical me-1"></i>Documents
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'scanner' %}active{% endif %}" href="{% url 'scanner' %}">
+                                <i class="fas fa-qrcode me-1"></i>Scanner
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'messages' %}active{% endif %}" href="{% url 'messages' %}">
+                                <i class="fas fa-envelope me-1"></i>Messages
+                                <span class="badge bg-danger ms-1" id="unread-messages-badge" style="display: none;">0</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'activities' %}active{% endif %}" href="{% url 'activities' %}">
+                                <i class="fas fa-clipboard-list me-1"></i>Activités
+                            </a>
+                        </li>
+                        {% else %}
+                        <!-- Navigation pour admin et doctor -->
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'patients' %}active{% endif %}" href="{% url 'patients' %}">
+                                <i class="fas fa-users me-1"></i>Patients
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'documents' %}active{% endif %}" href="{% url 'documents' %}">
+                                <i class="fas fa-file-medical me-1"></i>Documents
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'reports' %}active{% endif %}" href="{% url 'reports' %}">
+                                <i class="fas fa-chart-line me-1"></i>Rapports
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'scanner' %}active{% endif %}" href="{% url 'scanner' %}">
+                                <i class="fas fa-qrcode me-1"></i>Scanner
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'messages' %}active{% endif %}" href="{% url 'messages' %}">
+                                <i class="fas fa-envelope me-1"></i>Messages
+                                <span class="badge bg-danger ms-1" id="unread-messages-badge" style="display: none;">0</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% if user.is_staff %}
+                        {% if user.is_staff and user.role == 'admin' %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'users' %}active{% endif %}" href="{% url 'users' %}">
+                                <i class="fas fa-user-cog me-1"></i>Utilisateurs
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% if user.is_staff and user.role == 'admin' or user.role == 'technician' %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'settings' %}active{% endif %}" href="{% url 'settings' %}">
+                                <i class="fas fa-cog me-1"></i>Paramètres
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% endif %}
+                    </ul>
+                    
+                    <ul class="navbar-nav">
+                        <!-- Bouton de basculement de thème -->
+                        <li class="nav-item">
+                            <button class="btn btn-outline-secondary nav-link border-0" onclick="toggleTheme()" title="Changer le thème">
+                                <i class="fas fa-sun" id="theme-icon"></i>
+                            </button>
+                        </li>
+                        
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user me-1"></i>{{ user.get_full_name }}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-user me-2"></i>Profil</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Paramètres</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal"><i class="fas fa-sign-out-alt me-2"></i>Déconnexion</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    {% endif %}
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="container-fluid mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="{% if user.is_authenticated %}container-fluid mt-4{% endif %}">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Modal de déconnexion -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="logoutModalLabel">
+                        <i class="fas fa-sign-out-alt me-2"></i>Confirmer la déconnexion
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-user-circle fa-4x text-muted mb-3"></i>
+                        <h6>Êtes-vous sûr de vouloir vous déconnecter ?</h6>
+                        <p class="text-muted small">Toutes vos données non sauvegardées seront perdues.</p>
+                    </div>
+                    
+                    <div class="row text-center mb-3">
+                        <div class="col-6">
+                            <div class="border rounded p-2">
+                                <div class="h6 mb-1" id="sessionTime">00:00</div>
+                                <small class="text-muted">Temps de session</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-2">
+                                <div class="h6 mb-1" id="lastActivity">Maintenant</div>
+                                <small class="text-muted">Dernière activité</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info small">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Votre session sera fermée en toute sécurité.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Annuler
+                    </button>
+                    <a href="{% url 'clear_session' %}" class="btn btn-danger" id="confirmLogout">
+                        <i class="fas fa-sign-out-alt me-2"></i>Se déconnecter
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{% static 'js/app.js' %}"></script>
+    
+    <!-- Script pour mettre à jour les messages non lus -->
+    <script>
+    function updateUnreadMessagesCount() {
+        fetch('/communication/api/get-messages/')
+            .then(response => response.json())
+            .then(data => {
+                const unreadCount = data.unread_count || 0;
+                const badge = document.getElementById('unread-messages-badge');
+                
+                if (unreadCount > 0) {
+                    badge.textContent = unreadCount;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors de la récupération des messages:', error);
+            });
+    }
+    
+    // Mettre à jour le compteur au chargement de la page
+    document.addEventListener('DOMContentLoaded', function() {
+        updateUnreadMessagesCount();
+        
+        // Mettre à jour toutes les 30 secondes
+        setInterval(updateUnreadMessagesCount, 30000);
+    });
+    </script>
+    
+    <!-- Script pour le thème -->
+    <script>
+    // Fonction pour basculer entre les thèmes
+    function toggleTheme() {
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        let newTheme;
+        
+        if (currentTheme === 'light') {
+            newTheme = 'dark';
+        } else if (currentTheme === 'dark') {
+            newTheme = 'auto';
+        } else {
+            newTheme = 'light';
+        }
+        
+        changeTheme(newTheme);
+        
+        // Mettre à jour le sélecteur dans les paramètres s'il existe
+        const themeSelect = document.querySelector('select[name="theme"]');
+        if (themeSelect) {
+            themeSelect.value = newTheme;
+        }
+    }
+    
+    // Fonction pour changer le thème
+    function changeTheme(theme) {
+        const body = document.body;
+        const html = document.documentElement;
+        
+        // Supprimer les classes de thème existantes
+        body.classList.remove('light-theme', 'dark-theme');
+        html.classList.remove('light-theme', 'dark-theme');
+        
+        // Appliquer le nouveau thème
+        if (theme === 'dark') {
+            body.classList.add('dark-theme');
+            html.classList.add('dark-theme');
+            localStorage.setItem('theme', 'dark');
+        } else if (theme === 'light') {
+            body.classList.add('light-theme');
+            html.classList.add('light-theme');
+            localStorage.setItem('theme', 'light');
+        } else if (theme === 'auto') {
+            // Mode automatique basé sur les préférences système
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                body.classList.add('dark-theme');
+                html.classList.add('dark-theme');
+            } else {
+                body.classList.add('light-theme');
+                html.classList.add('light-theme');
+            }
+            localStorage.setItem('theme', 'auto');
+        }
+        
+        // Mettre à jour l'icône du bouton de thème
+        updateThemeIcon(theme);
+    }
+    
+    // Fonction pour mettre à jour l'icône du thème
+    function updateThemeIcon(theme) {
+        const themeIcon = document.getElementById('theme-icon');
+        if (themeIcon) {
+            if (theme === 'dark') {
+                themeIcon.className = 'fas fa-moon';
+            } else if (theme === 'light') {
+                themeIcon.className = 'fas fa-sun';
+            } else {
+                themeIcon.className = 'fas fa-adjust';
+            }
+        }
+    }
+    
+    // Charger le thème au chargement de la page
+    document.addEventListener('DOMContentLoaded', function() {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        changeTheme(savedTheme);
+        
+        // Écouter les changements de préférences système pour le mode auto
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                const currentTheme = localStorage.getItem('theme');
+                if (currentTheme === 'auto') {
+                    changeTheme('auto');
+                }
+            });
+        }
+        
+        // Initialiser le suivi de session
+        initializeSessionTracking();
+    });
+    
+    // Fonction pour initialiser le suivi de session
+    function initializeSessionTracking() {
+        // Sauvegarder le début de session
+        if (!localStorage.getItem('sessionStart')) {
+            localStorage.setItem('sessionStart', Date.now().toString());
+        }
+        
+        // Sauvegarder l'activité
+        function saveActivity() {
+            localStorage.setItem('lastActivity', Date.now().toString());
+        }
+        
+        // Sauvegarder l'activité lors des interactions
+        ['click', 'keypress', 'scroll', 'mousemove'].forEach(event => {
+            document.addEventListener(event, saveActivity, { passive: true });
+        });
+        
+        // Mettre à jour le modal de déconnexion
+        const logoutModal = document.getElementById('logoutModal');
+        if (logoutModal) {
+            logoutModal.addEventListener('show.bs.modal', function() {
+                updateSessionInfo();
+            });
+        }
+    }
+    
+    // Fonction pour mettre à jour les informations de session
+    function updateSessionInfo() {
+        // Calculer la durée de session
+        const sessionStart = localStorage.getItem('sessionStart');
+        const lastActivity = localStorage.getItem('lastActivity');
+        
+        if (sessionStart) {
+            const sessionDuration = Math.floor((Date.now() - parseInt(sessionStart)) / 1000);
+            const minutes = Math.floor(sessionDuration / 60);
+            const seconds = sessionDuration % 60;
+            document.getElementById('sessionTime').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        if (lastActivity) {
+            const lastActivityDate = new Date(parseInt(lastActivity));
+            const now = new Date();
+            const diffMinutes = Math.floor((now - lastActivityDate) / (1000 * 60));
+            
+            if (diffMinutes < 1) {
+                document.getElementById('lastActivity').textContent = 'Maintenant';
+            } else if (diffMinutes < 60) {
+                document.getElementById('lastActivity').textContent = `Il y a ${diffMinutes} min`;
+            } else {
+                document.getElementById('lastActivity').textContent = `Il y a ${Math.floor(diffMinutes / 60)}h`;
+            }
+        }
+    }
+    </script>
+    
+    <!-- CSS pour les thèmes -->
+    <style>
+    /* Thème clair (par défaut) */
+    .light-theme {
+        --bg-color: #ffffff;
+        --text-color: #333333;
+        --card-bg: #ffffff;
+        --border-color: #dee2e6;
+        --primary-color: #007bff;
+        --secondary-color: #6c757d;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --info-color: #17a2b8;
+    }
+
+    /* Thème sombre */
+    .dark-theme {
+        --bg-color: #1a1a1a;
+        --text-color: #ffffff;
+        --card-bg: #2d2d2d;
+        --border-color: #404040;
+        --primary-color: #0d6efd;
+        --secondary-color: #6c757d;
+        --success-color: #198754;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --info-color: #0dcaf0;
+    }
+
+    /* Application des variables CSS */
+    body {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .card {
+        background-color: var(--card-bg);
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+
+    .card-header {
+        background-color: transparent;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 16px 16px 0 0 !important;
+    }
+
+    .text-primary {
+        color: var(--primary-color) !important;
+    }
+
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        opacity: 0.9;
+    }
+
+    .form-control, .form-select {
+        background-color: var(--card-bg);
+        color: var(--text-color);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        background-color: var(--card-bg);
+        color: var(--text-color);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+        outline: none !important;
+    }
+
+    /* Suppression complète des artefacts visuels sur les sélecteurs */
+    .form-select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23666' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        outline: none !important;
+    }
+
+    .form-select:focus,
+    .form-select:active,
+    .form-select:hover {
+        outline: none !important;
+        border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .form-select:focus {
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15) !important;
+    }
+
+    /* Suppression des pseudo-éléments */
+    .form-select::before,
+    .form-select::after {
+        display: none !important;
+        content: none !important;
+    }
+
+    .navbar {
+        background-color: var(--card-bg) !important;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .sidebar {
+        background-color: var(--card-bg) !important;
+        border-right: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .dropdown-menu {
+        background-color: var(--card-bg);
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .dropdown-item {
+        color: var(--text-color);
+    }
+
+    .dropdown-item:hover {
+        background-color: var(--primary-color);
+        color: white;
+        transform: translateX(4px);
+        border-radius: 8px;
+        margin: 2px 8px;
+        transition: all 0.2s ease;
+    }
+
+    .alert {
+        background-color: var(--card-bg);
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        color: var(--text-color);
+    }
+
+    .table {
+        color: var(--text-color);
+    }
+
+    .table-striped > tbody > tr:nth-of-type(odd) > td {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .dark-theme .table-striped > tbody > tr:nth-of-type(odd) > td {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Styles pour le thème sombre */
+    .dark-theme .navbar {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .dark-theme .sidebar {
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .dark-theme .form-control, .dark-theme .form-select {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .dark-theme .form-control:focus, .dark-theme .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.2);
+    }
+
+    .dark-theme .form-select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ccc' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+        outline: none !important;
+    }
+
+    .dark-theme .form-select:focus,
+    .dark-theme .form-select:active,
+    .dark-theme .form-select:hover {
+        outline: none !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .dark-theme .form-select:focus {
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.2) !important;
+    }
+
+    .dark-theme .table-striped > tbody > tr:nth-of-type(odd) > td {
+        background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Animation de transition */
+    * {
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+    }
+
+    /* Support RTL pour l'arabe */
+    .rtl {
+        direction: rtl;
+        text-align: right;
+    }
+
+    .rtl .sidebar {
+        right: 0;
+        left: auto;
+        border-right: none;
+        border-left: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .rtl .main-content {
+        margin-right: 250px;
+        margin-left: 0;
+    }
+
+    .rtl .navbar-nav {
+        flex-direction: row-reverse;
+    }
+
+    .rtl .dropdown-menu {
+        right: 0;
+        left: auto;
+    }
+
+    .rtl .form-control,
+    .rtl .form-select {
+        text-align: right;
+    }
+
+    .rtl .btn-group {
+        flex-direction: row-reverse;
+    }
+
+    .rtl .card-header {
+        text-align: right;
+    }
+
+    .rtl .table th,
+    .rtl .table td {
+        text-align: right;
+    }
+
+    .rtl .modal-header .btn-close {
+        margin: -0.5rem -0.5rem -0.5rem auto;
+    }
+
+    .rtl .alert {
+        text-align: right;
+    }
+
+    .rtl .breadcrumb {
+        flex-direction: row-reverse;
+    }
+
+    .rtl .badge {
+        margin-left: 0.25rem;
+        margin-right: 0;
+    }
+
+    /* Amélioration de l'affichage arabe */
+    .lang-ar {
+        font-family: 'Segoe UI', 'Tahoma', 'Arial', sans-serif;
+    }
+
+    .lang-ar .navbar-brand,
+    .lang-ar h1, .lang-ar h2, .lang-ar h3, .lang-ar h4, .lang-ar h5, .lang-ar h6 {
+        font-family: 'Segoe UI', 'Tahoma', 'Arial', sans-serif;
+    }
+
+    .rtl .form-select {
+        background-position: left 0.75rem center !important;
+        padding-left: 2.25rem !important;
+        padding-right: 0.75rem !important;
+    }
+    </style>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

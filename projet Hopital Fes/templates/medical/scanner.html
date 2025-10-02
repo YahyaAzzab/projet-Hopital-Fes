@@ -1,0 +1,783 @@
+{% extends 'medical/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+.camera-preview {
+        position: relative;
+    display: inline-block;
+    border: 3px solid #007bff;
+    border-radius: 12px;
+        overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.camera-preview video {
+    display: block;
+    background: #000;
+}
+
+.captured-image-preview img {
+    max-height: 300px;
+    object-fit: contain;
+    border: 2px solid #28a745;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.scanner-area {
+    border: 2px dashed #d1d5db;
+        border-radius: 12px;
+    padding: 3rem 2rem;
+    background: #f9fafb;
+        transition: all 0.3s ease;
+    }
+
+.scanner-area:hover {
+    border-color: #4e73df;
+    background: #f0f4ff;
+}
+
+.camera-controls {
+        text-align: center;
+}
+
+.btn-group .btn {
+    margin: 0 5px;
+}
+
+#cameraContainer {
+    animation: fadeIn 0.5s ease-in;
+}
+
+#documentForm {
+    animation: slideUp 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+.form-control:focus, .form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .scan-item {
+        display: flex;
+        align-items: center;
+    padding: 1rem;
+    border: 1px solid #e3e6f0;
+        border-radius: 8px;
+    margin-bottom: 1rem;
+    background: #fff;
+    transition: all 0.3s ease;
+    }
+
+    .scan-item:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-color: #4e73df;
+    }
+
+    .scan-icon {
+    width: 50px;
+    height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.2rem;
+        color: white;
+    }
+
+.scan-icon.report {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .scan-content {
+        flex: 1;
+    }
+
+    .scan-name {
+        font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+    }
+
+    .scan-time {
+    font-size: 0.875rem;
+    color: #718096;
+    margin-bottom: 0.5rem;
+}
+
+.scan-details .badge {
+    font-size: 0.75rem;
+}
+
+.scan-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block title %}Scanner - Hôpital EL GHASSANI{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-qrcode me-2"></i>
+                    {% if user_role == 'admin' %}Scanner Intelligent - Administrateur
+                    {% elif user_role == 'doctor' %}Scanner Intelligent - Médecin
+                    {% elif user_role == 'nurse' %}Scanner Intelligent - Infirmier
+                    {% else %}Scanner Intelligent{% endif %}
+                </h6>
+            </div>
+            <div class="card-body text-center">
+    <div class="scanner-container">
+                    <div id="scanner-area" class="scanner-area">
+                        <i class="fas fa-qrcode fa-5x text-muted mb-3"></i>
+                        <h5>Scanner QR Code</h5>
+                        <p class="text-muted">Placez le code QR dans la zone de scan</p>
+            </div>
+
+        </div>
+                <div class="mt-4">
+                    <button class="btn btn-primary btn-lg me-3" onclick="startCamera()" id="startCameraBtn">
+                        <i class="fas fa-camera me-2"></i>Démarrer la Caméra
+                    </button>
+                    <button class="btn btn-success btn-lg" onclick="capturePhoto()" id="captureBtn" style="display:none;">
+                        <i class="fas fa-camera-retro me-2"></i>Capturer
+                    </button>
+                    <button class="btn btn-danger btn-lg" onclick="stopCamera()" id="stopBtn" style="display:none;">
+                        <i class="fas fa-stop me-2"></i>Arrêter
+                    </button>
+    </div>
+
+                <!-- Zone d'affichage de la caméra -->
+                <div class="mt-4" id="cameraContainer" style="display:none;">
+                    <div class="camera-preview">
+                        <video id="video" width="640" height="480" autoplay muted></video>
+                        <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+                </div>
+                    <div class="camera-controls mt-3">
+                        <div class="d-flex justify-content-center gap-3">
+                            <button class="btn btn-outline-primary" onclick="switchCamera()">
+                                <i class="fas fa-sync-alt me-1"></i>Changer Caméra
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="toggleFlash()">
+                                <i class="fas fa-flash me-1"></i>Flash
+                            </button>
+            </div>
+        </div>
+                </div>
+            </div>
+        </div>
+                </div>
+            </div>
+
+<!-- Statistiques du scanner -->
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-file-alt fa-2x text-primary mb-2"></i>
+                <h5 class="mb-1">{{ total_scans }}</h5>
+                <p class="text-muted mb-0">
+                    {% if user_role == 'admin' %}Documents scannés
+                    {% else %}Mes documents{% endif %}
+                </p>
+        </div>
+    </div>
+                        </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-calendar-day fa-2x text-success mb-2"></i>
+                <h5 class="mb-1">{{ scans_today }}</h5>
+                <p class="text-muted mb-0">
+                    {% if user_role == 'admin' %}Scans aujourd'hui
+                    {% else %}Mes scans aujourd'hui{% endif %}
+                </p>
+                        </div>
+                    </div>
+    </div>
+                </div>
+
+<!-- Section spécifique selon le rôle -->
+{% if user_role == 'admin' %}
+<!-- Section Admin : Rapports scannés récents -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="fas fa-file-medical me-2"></i>Rapports scannés récents
+                </h6>
+            </div>
+            <div class="card-body">
+                <!-- Rapport scanné 1 -->
+                <div class="scan-item">
+                    <div class="scan-icon report">
+                        <i class="fas fa-x-ray"></i>
+                    </div>
+                    <div class="scan-content">
+                        <div class="scan-name">Rapport de Radiographie - Abdomen</div>
+                        <div class="scan-time">Scanné le 01/10/2025 à 14:30</div>
+                        <div class="scan-details mt-1">
+                            <span class="badge bg-primary me-2">Radiologie</span>
+                            <span class="badge bg-success">Traitement IA terminé</span>
+                        </div>
+                    </div>
+                    <div class="scan-actions">
+                        <button class="btn btn-sm btn-outline-primary me-2" onclick="viewScannedReport(1)">
+                            <i class="fas fa-eye"></i> Voir
+                    </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="downloadScannedReport(1)">
+                            <i class="fas fa-download"></i> Télécharger
+                    </button>
+                    </div>
+                </div>
+
+                <!-- Rapport scanné 2 -->
+                <div class="scan-item">
+                    <div class="scan-icon report">
+                        <i class="fas fa-vial"></i>
+                    </div>
+                    <div class="scan-content">
+                        <div class="scan-name">Résultats d'Analyses de Laboratoire</div>
+                        <div class="scan-time">Scanné le 01/10/2025 à 15:45</div>
+                        <div class="scan-details mt-1">
+                            <span class="badge bg-info me-2">Laboratoire</span>
+                            <span class="badge bg-warning">En cours de traitement IA</span>
+                        </div>
+                    </div>
+                    <div class="scan-actions">
+                        <button class="btn btn-sm btn-outline-primary me-2" onclick="viewScannedReport(2)">
+                            <i class="fas fa-eye"></i> Voir
+                    </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="downloadScannedReport(2)">
+                            <i class="fas fa-download"></i> Télécharger
+                    </button>
+                </div>
+                </div>
+            </div>
+        </div>
+            </div>
+        </div>
+
+{% else %}
+<!-- Section Médecin/Infirmier : Mes documents récents -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="fas fa-file-alt me-2"></i>Mes documents récents
+                </h6>
+                </div>
+            <div class="card-body">
+                {% if total_scans > 0 %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Vous avez {{ total_scans }} document(s) scanné(s). 
+                    {% if scans_today > 0 %}
+                    {{ scans_today }} document(s) scanné(s) aujourd'hui.
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Aucun document scanné pour le moment. Utilisez le scanner pour numériser vos documents médicaux.
+                </div>
+                {% endif %}
+                
+                <div class="text-center mt-3">
+                    <a href="{% url 'documents' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-folder-open me-2"></i>Voir tous mes documents
+                    </a>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Formulaire de traitement des documents -->
+<div class="row mt-4" id="documentForm" style="display:none;">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="fas fa-file-alt me-2"></i>Traiter le Document Capturé
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="captured-image-preview">
+                            <img id="capturedImage" src="" alt="Image capturée" class="img-fluid rounded border">
+                    </div>
+                    </div>
+                    <div class="col-md-6">
+                        <form id="documentProcessingForm">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="documentType" class="form-label">Type de Document</label>
+                                <select class="form-select" id="documentType" name="document_type" required>
+                                    <option value="">Sélectionner le type</option>
+                                    <option value="prescription">Prescription</option>
+                                    <option value="lab_results">Résultats de Laboratoire</option>
+                            <option value="radiology">Radiologie</option>
+                                    <option value="medical_report">Rapport Médical</option>
+                                    <option value="insurance">Document d'Assurance</option>
+                            <option value="other">Autre</option>
+                        </select>
+                </div>
+                
+                            <div class="mb-3">
+                                <label for="patientSelect" class="form-label">Patient</label>
+                                <select class="form-select" id="patientSelect" name="patient_id">
+                                    <option value="">Sélectionner un patient (optionnel)</option>
+                            {% for patient in recent_patients %}
+                                    <option value="{{ patient.id }}">{{ patient.first_name }} {{ patient.last_name }} ({{ patient.patient_id }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                            
+                            <div class="mb-3">
+                                <label for="documentTitle" class="form-label">Titre du Document</label>
+                                <input type="text" class="form-control" id="documentTitle" name="title" placeholder="Ex: Rapport de radiographie du thorax" required>
+                    </div>
+                            
+                            <div class="mb-3">
+                                <label for="documentNotes" class="form-label">Notes</label>
+                                <textarea class="form-control" id="documentNotes" name="notes" rows="3" placeholder="Notes additionnelles sur le document..."></textarea>
+                </div>
+                
+                <div class="mb-3">
+                                <label for="documentPriority" class="form-label">Priorité</label>
+                                <select class="form-select" id="documentPriority" name="priority">
+                                    <option value="normal">Normale</option>
+                                    <option value="high">Élevée</option>
+                                    <option value="urgent">Urgente</option>
+                                </select>
+                </div>
+                
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-primary" onclick="processDocument()">
+                                    <i class="fas fa-save me-2"></i>Traiter le Document
+                    </button>
+                                <button type="button" class="btn btn-secondary" onclick="retakePhoto()">
+                                    <i class="fas fa-redo me-2"></i>Reprendre la Photo
+                                </button>
+                                <button type="button" class="btn btn-danger" onclick="cancelProcessing()">
+                                    <i class="fas fa-times me-2"></i>Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+        </div>
+    </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Variables globales pour la caméra
+let stream = null;
+let currentDeviceId = null;
+let devices = [];
+let isFlashOn = false;
+
+// Fonction pour démarrer la caméra
+async function startCamera() {
+    try {
+        console.log('Démarrage de la caméra...');
+        
+        const mediaDevices = await navigator.mediaDevices.enumerateDevices();
+        devices = mediaDevices.filter(device => device.kind === 'videoinput');
+        
+        if (devices.length === 0) {
+            alert('Aucune caméra détectée sur cet appareil.');
+        return;
+    }
+
+        const constraints = {
+            video: {
+                width: { ideal: 640 },
+                height: { ideal: 480 },
+                facingMode: 'environment'
+            }
+        };
+        
+        if (currentDeviceId) {
+            constraints.video.deviceId = { exact: currentDeviceId };
+        }
+        
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+        
+        const video = document.getElementById('video');
+        video.srcObject = stream;
+        
+        document.getElementById('cameraContainer').style.display = 'block';
+        document.getElementById('startCameraBtn').style.display = 'none';
+        document.getElementById('captureBtn').style.display = 'inline-block';
+        document.getElementById('stopBtn').style.display = 'inline-block';
+        document.getElementById('documentForm').style.display = 'none';
+        
+        console.log('Caméra démarrée avec succès');
+        
+    } catch (error) {
+        console.error('Erreur caméra:', error);
+        let errorMessage = 'Erreur caméra. ';
+        if (error.name === 'NotAllowedError') {
+            errorMessage += 'Permission refusée.';
+        } else if (error.name === 'NotFoundError') {
+            errorMessage += 'Aucune caméra trouvée.';
+        } else {
+            errorMessage += error.message;
+        }
+        alert(errorMessage);
+    }
+}
+
+// Fonction pour capturer une photo
+function capturePhoto() {
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+    
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imageData = canvas.toDataURL('image/jpeg', 0.8);
+    
+    const capturedImage = document.getElementById('capturedImage');
+    capturedImage.src = imageData;
+    
+    document.getElementById('cameraContainer').style.display = 'none';
+    document.getElementById('documentForm').style.display = 'block';
+    document.getElementById('captureBtn').style.display = 'none';
+    document.getElementById('stopBtn').style.display = 'none';
+    document.getElementById('startCameraBtn').style.display = 'inline-block';
+    
+            stopCamera();
+    console.log('Photo capturée avec succès');
+}
+
+// Fonction pour arrêter la caméra
+function stopCamera() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+    }
+    
+    const video = document.getElementById('video');
+    video.srcObject = null;
+    
+    document.getElementById('cameraContainer').style.display = 'none';
+    document.getElementById('startCameraBtn').style.display = 'inline-block';
+    document.getElementById('captureBtn').style.display = 'none';
+    document.getElementById('stopBtn').style.display = 'none';
+    
+    console.log('Caméra arrêtée');
+}
+
+// Fonction pour changer de caméra
+async function switchCamera() {
+    if (devices.length <= 1) {
+        alert('Une seule caméra disponible.');
+        return;
+    }
+    
+    let currentIndex = devices.findIndex(device => device.deviceId === currentDeviceId);
+    currentIndex = (currentIndex + 1) % devices.length;
+    currentDeviceId = devices[currentIndex].deviceId;
+    
+    stopCamera();
+    await startCamera();
+    
+    console.log('Caméra changée vers:', devices[currentIndex].label);
+}
+
+// Fonction pour activer/désactiver le flash (simulation)
+function toggleFlash() {
+    isFlashOn = !isFlashOn;
+    const flashBtn = event.target.closest('button');
+    
+    if (isFlashOn) {
+        flashBtn.innerHTML = '<i class="fas fa-flash me-1"></i>Flash ON';
+        flashBtn.classList.remove('btn-outline-secondary');
+        flashBtn.classList.add('btn-warning');
+        
+        document.body.style.backgroundColor = '#ffffff';
+        setTimeout(() => {
+            document.body.style.backgroundColor = '';
+        }, 100);
+    } else {
+        flashBtn.innerHTML = '<i class="fas fa-flash me-1"></i>Flash';
+        flashBtn.classList.remove('btn-warning');
+        flashBtn.classList.add('btn-outline-secondary');
+    }
+    
+    console.log('Flash:', isFlashOn ? 'ON' : 'OFF');
+}
+
+// Fonction pour traiter le document
+function processDocument() {
+    const form = document.getElementById('documentProcessingForm');
+    const formData = new FormData(form);
+    
+    const documentType = document.getElementById('documentType').value;
+    const documentTitle = document.getElementById('documentTitle').value;
+    
+    if (!documentType) {
+        alert('Veuillez sélectionner un type de document.');
+        return;
+    }
+    
+    if (!documentTitle.trim()) {
+        alert('Veuillez saisir un titre pour le document.');
+        return;
+    }
+
+    const capturedImage = document.getElementById('capturedImage');
+    if (capturedImage.src) {
+        formData.append('captured_image', capturedImage.src);
+    }
+    
+    console.log('Traitement du document:', Object.fromEntries(formData));
+    
+    alert('Document traité avec succès !\n\nType: ' + documentType + '\nTitre: ' + documentTitle);
+    
+    cancelProcessing();
+}
+
+// Fonction pour reprendre une photo
+function retakePhoto() {
+    document.getElementById('documentForm').style.display = 'none';
+    startCamera();
+}
+
+// Fonction pour annuler le traitement
+function cancelProcessing() {
+    document.getElementById('documentForm').style.display = 'none';
+    document.getElementById('capturedImage').src = '';
+    document.getElementById('documentProcessingForm').reset();
+    console.log('Traitement annulé');
+}
+
+// Fonction pour démarrer le scanner (ancienne fonction)
+function startScanner() {
+    startCamera();
+}
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Scanner initialisé');
+    
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Votre navigateur ne supporte pas l\'accès à la caméra. Veuillez utiliser un navigateur moderne.');
+    }
+});
+
+// Fonctions pour gérer les rapports scannés (Admin seulement)
+function viewScannedReport(reportId) {
+    console.log(`Visualisation du rapport scanné ${reportId}`);
+    
+    // Données simulées des rapports
+    const reports = {
+        1: {
+            title: "Rapport de Radiographie - Abdomen",
+            type: "Radiologie",
+            date: "01/10/2025 à 14:30",
+            patient: "Patient anonyme",
+            status: "Traitement IA terminé",
+            content: `
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-x-ray me-2"></i>Rapport de Radiographie</h6>
+                    <p><strong>Examen :</strong> Radiographie de l'abdomen sans préparation</p>
+                    <p><strong>Date :</strong> 01/10/2025</p>
+                    <p><strong>Technique :</strong> Radiographie standard</p>
+                    <p><strong>Résultats :</strong> Abdomen sans signe de pneumopéritoine. Structures abdominales normales.</p>
+                    <p><strong>Conclusion :</strong> Abdomen sans anomalie significative.</p>
+                    <p><strong>Médecin :</strong> Dr. Radiologue</p>
+                </div>
+            `
+        },
+        2: {
+            title: "Résultats d'Analyses de Laboratoire",
+            type: "Laboratoire",
+            date: "01/10/2025 à 15:45",
+            patient: "Patient anonyme",
+            status: "En cours de traitement IA",
+            content: `
+                <div class="alert alert-warning">
+                    <h6><i class="fas fa-vial me-2"></i>Résultats de Laboratoire</h6>
+                    <p><strong>Date de prélèvement :</strong> 01/10/2025</p>
+                    <p><strong>Hémoglobine :</strong> 13.2 g/dL (N: 12-16)</p>
+                    <p><strong>Glucose :</strong> 95 mg/dL (N: 70-110)</p>
+                    <p><strong>Cholestérol :</strong> 185 mg/dL (N: <200)</p>
+                    <p><strong>Créatinine :</strong> 0.9 mg/dL (N: 0.6-1.2)</p>
+                    <p><strong>Statut :</strong> Analyses en cours de traitement par IA</p>
+                </div>
+            `
+        }
+    };
+    
+    const report = reports[reportId];
+    if (!report) {
+        alert('Rapport non trouvé');
+        return;
+    }
+    
+    // Créer et afficher le modal
+    showReportModal(report);
+}
+
+function showReportModal(report) {
+    console.log('Affichage du modal pour le rapport:', report.title);
+    
+    // Supprimer l'ancien modal s'il existe
+    const existingModal = document.getElementById('scannedReportModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Déterminer l'ID du rapport pour le bouton télécharger
+    let reportId = 1;
+    if (report.title.includes('Laboratoire')) {
+        reportId = 2;
+    }
+    
+    const modalHTML = `
+        <div class="modal fade" id="scannedReportModal" tabindex="-1" aria-labelledby="scannedReportModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="scannedReportModalLabel">
+                            <i class="fas fa-file-medical me-2"></i>${report.title}
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Type :</strong> ${report.type}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Date :</strong> ${report.date}
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-md-6">
+                                    <strong>Patient :</strong> ${report.patient}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Statut :</strong> 
+                                    <span class="badge ${report.status.includes('terminé') ? 'bg-success' : 'bg-warning'}">
+                                        ${report.status}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="report-content">
+                            ${report.content}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Fermer
+        </button>
+                        <button type="button" class="btn btn-success" onclick="downloadScannedReport(${reportId})">
+                            <i class="fas fa-download me-2"></i>Télécharger
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Ajouter le modal au DOM
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Attendre que le modal soit ajouté au DOM
+    setTimeout(() => {
+        const modalElement = document.getElementById('scannedReportModal');
+        if (modalElement) {
+            // Vérifier si Bootstrap est disponible
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+            } else {
+                // Fallback si Bootstrap n'est pas disponible
+                modalElement.style.display = 'block';
+                modalElement.classList.add('show');
+                document.body.classList.add('modal-open');
+            }
+            
+            // Supprimer le modal du DOM quand il est fermé
+            modalElement.addEventListener('hidden.bs.modal', () => {
+                modalElement.remove();
+            });
+        } else {
+            console.error('Le modal n\'a pas pu être créé');
+            alert('Erreur: Impossible d\'afficher le rapport. Vérifiez la console pour plus de détails.');
+        }
+    }, 100);
+}
+
+function downloadScannedReport(reportId) {
+    console.log(`Téléchargement du rapport scanné ${reportId}`);
+    
+    // Simuler le téléchargement
+    const reports = {
+        1: {
+            filename: "rapport_radiographie_abdomen_01_10_2025.pdf",
+            title: "Rapport de Radiographie - Abdomen"
+        },
+        2: {
+            filename: "resultats_laboratoire_01_10_2025.pdf", 
+            title: "Résultats d'Analyses de Laboratoire"
+        }
+    };
+    
+    const report = reports[reportId];
+    if (!report) {
+        alert('Rapport non trouvé');
+        return;
+    }
+    
+    // Créer un lien de téléchargement simulé
+    const link = document.createElement('a');
+    link.href = 'data:application/pdf;base64,JVBERi0xLjQKJdPr6eEKMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDwKL1R5cGUgL1BhZ2VzCi9LaWRzIFszIDAgUl0KL0NvdW50IDEKL01lZGlhQm94IFswIDAgNTk1IDg0Ml0KPj4KZW5kb2JqCjMgMCBvYmoKPDwKL1R5cGUgL1BhZ2UKL1BhcmVudCAyIDAgUgovUmVzb3VyY2VzIDw8Ci9Gb250IDw8Ci9GMSA0IDAgUgo+Pgo+PgovQ29udGVudHMgNSAwIFIKPj4KZW5kb2JqCjQgMCBvYmoKPDwKL1R5cGUgL0ZvbnQKL1N1YnR5cGUgL1R5cGUxCi9CYXNlRm9udCAvSGVsdmV0aWNhCj4+CmVuZG9iago1IDAgb2JqCjw8Ci9MZW5ndGggNDQKPj4Kc3RyZWFtCkJUCi9GMSAxMiBUZgoyMCA3MDAgVGQKKFJhcHBvcnQgZGUgUmFkaW9ncmFwaGllKSBUagoKRVQKZW5kc3RyZWFtCmVuZG9iagp4cmVmCjAgNgowMDAwMDAwMDAwIDY1NTM1IGYKMDAwMDAwMDAwOSAwMDAwMCBuCjAwMDAwMDAwNTggMDAwMDAgbgowMDAwMDAwMTE1IDAwMDAwIG4KMDAwMDAwMDI2MCAwMDAwMCBuCjAwMDAwMDAzNDUgMDAwMDAgbgp0cmFpbGVyCjw8Ci9TaXplIDYKL1Jvb3QgMSAwIFIKPj4Kc3RhcnR4cmVmCjQ0MAolJUVPRg==';
+    link.download = report.filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Afficher une notification de succès
+    alert(`Téléchargement de "${report.title}" démarré`);
+}
+</script>
+{% endblock %}
+

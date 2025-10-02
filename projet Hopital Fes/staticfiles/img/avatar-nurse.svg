@@ -1,0 +1,41 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fond circulaire -->
+  <circle cx="60" cy="60" r="60" fill="#F3E5F5"/>
+  
+  <!-- Corps de l'infirmière -->
+  <circle cx="60" cy="75" r="25" fill="#9C27B0"/>
+  
+  <!-- Tête -->
+  <circle cx="60" cy="45" r="20" fill="#FFDBAC"/>
+  
+  <!-- Uniforme -->
+  <path d="M45 75 L45 90 L75 90 L75 75 L70 70 L50 70 Z" fill="#E1BEE7"/>
+  
+  <!-- Col de l'uniforme -->
+  <path d="M50 70 L50 65 L70 65 L70 70" fill="#E1BEE7"/>
+  
+  <!-- Coiffe d'infirmière -->
+  <path d="M40 35 L80 35 Q85 40 80 45 L40 45 Q35 40 40 35" fill="white"/>
+  <path d="M45 35 L45 40 L75 40 L75 35" fill="#F8BBD9"/>
+  
+  <!-- Croix sur la coiffe -->
+  <rect x="57" y="37" width="6" height="6" fill="#9C27B0"/>
+  <rect x="56" y="39" width="8" height="2" fill="#9C27B0"/>
+  
+  <!-- Yeux -->
+  <circle cx="55" cy="42" r="2" fill="#37474F"/>
+  <circle cx="65" cy="42" r="2" fill="#37474F"/>
+  
+  <!-- Sourire -->
+  <path d="M55 48 Q60 52 65 48" stroke="#37474F" stroke-width="1.5" fill="none"/>
+  
+  <!-- Cheveux -->
+  <path d="M45 35 Q60 25 75 35 Q70 30 60 30 Q50 30 45 35" fill="#5D4037"/>
+  
+  <!-- Badge d'identification -->
+  <rect x="55" y="80" width="10" height="6" rx="1" fill="white"/>
+  <text x="60" y="84" text-anchor="middle" font-size="3" fill="#9C27B0">RN</text>
+  
+  <!-- Bordure -->
+  <circle cx="60" cy="60" r="58" stroke="#E1BEE7" stroke-width="4" fill="none"/>
+</svg>

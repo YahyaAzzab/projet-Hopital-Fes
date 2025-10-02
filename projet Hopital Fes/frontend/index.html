@@ -1,0 +1,2851 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plateforme de Numérisation Médicale - Hôpital EL GHASSANI</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- jsPDF pour l'export PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/enhancements.css" rel="stylesheet">
+    <link href="css/patients-design.css" rel="stylesheet">
+    <link href="css/alerts-system.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Page de Connexion -->
+    <div id="loginPage" class="login-page">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <div class="hospital-logo">
+                        <i class="fas fa-hospital-symbol"></i>
+                    </div>
+                    <h1 class="login-title">Plateforme de Numérisation</h1>
+                    <p class="hospital-name">Hôpital EL GHASSANI</p>
+                    <p class="hospital-subtitle">Système Intelligent de Dossiers Médicaux</p>
+                </div>
+                
+                <form id="loginForm" class="login-form">
+                    <div class="form-group">
+                        <label for="email" class="email-label">Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                            <input type="email" id="email" name="email" class="form-control" 
+                                   placeholder="votre.email@elghassani.ma" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password" class="password-label">Mot de passe</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <input type="password" id="password" name="password" class="form-control" 
+                                   placeholder="Votre mot de passe" required>
+                            <button type="button" class="btn btn-outline-secondary" onclick="togglePassword()">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-login">
+                        <span class="btn-text login-button">Se connecter</span>
+                        <span class="btn-spinner d-none">
+                            <i class="fas fa-spinner fa-spin"></i> Connexion...
+                        </span>
+                    </button>
+                    
+                    <div id="loginError" class="alert alert-danger d-none" role="alert"></div>
+                </form>
+                
+                <div class="demo-accounts">
+                    <h6 class="demo-accounts-title">Comptes de démonstration :</h6>
+                    <div class="demo-buttons">
+                        <button class="btn btn-outline-danger btn-sm" onclick="quickLogin('admin')">
+                            <i class="fas fa-user-shield"></i> <span class="admin-button">Admin</span>
+                        </button>
+                        <button class="btn btn-outline-success btn-sm" onclick="quickLogin('doctor')">
+                            <i class="fas fa-user-md"></i> <span class="doctor-button">Médecin</span>
+                        </button>
+                        <button class="btn btn-outline-info btn-sm" onclick="quickLogin('nurse')">
+                            <i class="fas fa-user-nurse"></i> <span class="nurse-button">Infirmière</span>
+                        </button>
+                        <button class="btn btn-outline-warning btn-sm" onclick="quickLogin('technician')">
+                            <i class="fas fa-tools"></i> <span class="technician-button">Technicien</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Principale -->
+    <div id="mainApp" class="d-none">
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#" onclick="showPage('dashboard')">
+                    <i class="fas fa-hospital-symbol me-2"></i>
+                    Numérisation Médicale
+                </a>
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto" id="mainNavigation">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showPage('dashboard')" id="nav-dashboard">
+                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showPage('patients')" id="nav-patients">
+                                <i class="fas fa-users me-1"></i>Patients
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showPage('documents')" id="nav-documents">
+                                <i class="fas fa-file-medical me-1"></i>Documents
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showPage('scanner')" id="nav-scanner">
+                                <i class="fas fa-camera me-1"></i>Scanner
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showPage('reports')" id="nav-reports">
+                                <i class="fas fa-chart-line me-1"></i>Rapports
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showPage('users')" id="nav-users">
+                                <i class="fas fa-user-cog me-1"></i>Utilisateurs
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showPage('settings')" id="nav-settings">
+                                <i class="fas fa-cog me-1"></i>Paramètres
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <ul class="navbar-nav">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <span class="avatar-sm bg-light text-primary rounded-circle me-2">
+                                    <span id="userInitials">U</span>
+                                </span>
+                                <span id="userName">Utilisateur</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><h6 class="dropdown-header" id="userRole">Rôle</h6></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="showProfile()">
+                                    <i class="fas fa-user me-2"></i>Profil
+                                </a></li>
+                                <li><a class="dropdown-item" href="#" onclick="changePassword()">
+                                    <i class="fas fa-key me-2"></i>Changer mot de passe
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="logout()">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
+                                </a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Contenu Principal -->
+        <div class="main-content">
+            <!-- Page Dashboard -->
+            <div id="dashboardPage" class="page-content">
+                <div class="container-fluid">
+                    <div class="page-header">
+                        <h1><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h1>
+                        <p class="text-muted">Vue d'ensemble de la numérisation médicale</p>
+                    </div>
+                    
+                    <!-- Cartes de Statistiques -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 mb-4">
+                            <div class="stats-card primary">
+                                <div class="stats-icon" style="background-color: #2563eb;">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="stats-number" id="totalPatients">127</div>
+                                <div class="stats-label">Patients Enregistrés</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-4">
+                            <div class="stats-card info">
+                                <div class="stats-icon" style="background-color: #0891b2;">
+                                    <i class="fas fa-file-medical"></i>
+                                </div>
+                                <div class="stats-number" id="totalDocuments">342</div>
+                                <div class="stats-label">Documents Numérisés</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-4">
+                            <div class="stats-card warning">
+                                <div class="stats-icon" style="background-color: #d97706;">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="stats-number" id="pendingDocuments">23</div>
+                                <div class="stats-label">En Attente de Traitement</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-4">
+                            <div class="stats-card success">
+                                <div class="stats-icon" style="background-color: #059669;">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <div class="stats-number" id="aiProcessed">89</div>
+                                <div class="stats-label">Traités par IA</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                    <!-- Sections Administrateur -->
+                    <div id="adminSections" class="d-none">
+                        <!-- Analytics Avancées -->
+                        <div class="row mb-4">
+                            <div class="col-lg-6">
+                                <div class="card border-primary">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5><i class="fas fa-chart-line me-2"></i>Analytics Avancées</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <div class="text-center">
+                                                    <h3 class="text-primary mb-1" id="avgDocumentsPerPatient">0</h3>
+                                                    <small class="text-muted">Documents/Patient</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="text-center">
+                                                    <h3 class="text-success mb-1" id="aiSuccessRate">0%</h3>
+                                                    <small class="text-muted">Taux IA</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Documents traités aujourd'hui:</span>
+                                            <strong id="documentsToday">0</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Utilisateurs connectés:</span>
+                                            <strong id="activeUsers">0</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="card border-warning">
+                                    <div class="card-header bg-warning text-dark">
+                                        <h5><i class="fas fa-shield-alt me-2"></i>Moniteur Système</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>Utilisation Stockage</span>
+                                                <span id="storageUsage">0%</span>
+                                            </div>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 45%"></div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>Performance IA</span>
+                                                <span id="aiPerformance">0%</span>
+                                            </div>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-info" role="progressbar" style="width: 78%"></div>
+                                            </div>
+                                        </div>
+                                        <div class="alert alert-success alert-sm mb-0">
+                                            <i class="fas fa-check-circle me-1"></i>
+                                            Système opérationnel
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions Administrateur -->
+                        <div class="row mb-4">
+                            <div class="col-lg-6">
+                                <div class="card border-success">
+                                    <div class="card-header bg-success text-white">
+                                        <h5><i class="fas fa-cogs me-2"></i>Actions Administrateur</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-grid gap-2">
+                                            <button class="btn btn-outline-primary" onclick="app.backupSystem()">
+                                                <i class="fas fa-download me-2"></i>Sauvegarde Système
+                                            </button>
+                                            <button class="btn btn-outline-warning" onclick="app.clearCache()">
+                                                <i class="fas fa-broom me-2"></i>Vider le Cache
+                                            </button>
+                                            <button class="btn btn-outline-info" onclick="app.generateSystemReport()">
+                                                <i class="fas fa-file-alt me-2"></i>Rapport Système
+                                            </button>
+                                            <button class="btn btn-outline-danger" onclick="app.maintenanceMode()">
+                                                <i class="fas fa-tools me-2"></i>Mode Maintenance
+                                            </button>
+                                        </div>
+                                        <hr>
+                                        <div class="text-center">
+                                            <small class="text-muted">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Dernière sauvegarde: <span id="lastBackup">Jamais</span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="card border-info">
+                                    <div class="card-header bg-info text-white">
+                                        <h5><i class="fas fa-chart-pie me-2"></i>Statistiques Système</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <div class="text-center">
+                                                    <h4 class="text-info mb-1" id="totalUsers">4</h4>
+                                                    <small class="text-muted">Utilisateurs</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="text-center">
+                                                    <h4 class="text-success mb-1" id="activeSessions">1</h4>
+                                                    <small class="text-muted">Sessions Actives</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Dernière maintenance:</span>
+                                            <strong>Il y a 2 jours</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Version système:</span>
+                                            <strong>v1.0.0</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Logs Système -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card border-dark">
+                                    <div class="card-header bg-dark text-white">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h5><i class="fas fa-file-alt me-2"></i>Logs Système</h5>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-light" onclick="app.filterLogs('all')">Tous</button>
+                                                <button class="btn btn-outline-light" onclick="app.filterLogs('error')">Erreurs</button>
+                                                <button class="btn btn-outline-light" onclick="app.filterLogs('warning')">Avertissements</button>
+                                                <button class="btn btn-outline-light" onclick="app.clearLogs()">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div id="systemLogs" style="height: 300px; overflow-y: auto; background-color: #f8f9fa;">
+                                            <!-- Les logs seront chargés ici -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Export Global des Graphiques -->
+                    <div class="row mb-3" id="globalExportSection">
+                        <div class="col-12">
+                            <div class="card border-info">
+                                <div class="card-body py-2">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-0 text-info">
+                                                <i class="fas fa-download me-2"></i>Export des Graphiques
+                                            </h6>
+                                            <small class="text-muted">Exporter tous les graphiques du dashboard</small>
+                                        </div>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="app.exportAllCharts('png')">
+                                                <i class="fas fa-images me-1"></i>Exporter tout en PNG
+                                            </button>
+                                            <button class="btn btn-outline-success" onclick="app.exportAllCharts('pdf')">
+                                                <i class="fas fa-file-pdf me-1"></i>Exporter tout en PDF
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Graphiques et Activité -->
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                    <h5><i class="fas fa-chart-bar me-2"></i>Activité de Numérisation</h5>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="app.exportChart('digitizationChart', 'png')" title="Exporter en PNG">
+                                                <i class="fas fa-image me-1"></i>PNG
+                                            </button>
+                                            <button class="btn btn-outline-success" onclick="app.exportChart('digitizationChart', 'pdf')" title="Exporter en PDF">
+                                                <i class="fas fa-file-pdf me-1"></i>PDF
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="digitizationChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                    <h5><i class="fas fa-pie-chart me-2"></i>Types de Documents</h5>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="app.exportChart('documentTypesChart', 'png')" title="Exporter en PNG">
+                                                <i class="fas fa-image me-1"></i>PNG
+                                            </button>
+                                            <button class="btn btn-outline-success" onclick="app.exportChart('documentTypesChart', 'pdf')" title="Exporter en PDF">
+                                                <i class="fas fa-file-pdf me-1"></i>PDF
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="documentTypesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Alertes Système -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-white border-0">
+                                    <h5 class="mb-0 fw-bold text-dark">
+                                        <i class="fas fa-exclamation-triangle me-2 text-warning"></i>Alertes Système
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <div class="alert alert-warning border-0 shadow-sm mb-0">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="alert-icon me-3">
+                                                        <i class="fas fa-clock fa-lg"></i>
+                                                    </div>
+                                                    <div>
+                                                        <strong>Documents en attente</strong><br>
+                                                        <small>23 documents en attente de validation</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="alert alert-info border-0 shadow-sm mb-0">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="alert-icon me-3">
+                                                        <i class="fas fa-robot fa-lg"></i>
+                                                    </div>
+                                                    <div>
+                                                        <strong>IA Active</strong><br>
+                                                        <small>Traitement automatique en cours</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="alert alert-success border-0 shadow-sm mb-0">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="alert-icon me-3">
+                                                        <i class="fas fa-shield-check fa-lg"></i>
+                                                    </div>
+                                                    <div>
+                                                        <strong>Système Opérationnel</strong><br>
+                                                        <small>Système sécurisé et opérationnel</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Activité Récente Moderne -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-white border-0">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0 fw-bold text-dark">
+                                            <i class="fas fa-history me-2 text-primary"></i>Activité Récente
+                                            <span class="badge bg-success bg-opacity-10 text-success ms-2" id="realtimeIndicator">
+                                                <i class="fas fa-circle me-1" style="font-size: 0.6rem; animation: pulse 2s infinite;"></i>Temps réel
+                                            </span>
+                                        </h5>
+                                        <button class="btn btn-outline-primary btn-sm rounded-pill" onclick="toggleRealtimeMode()">
+                                            <i class="fas fa-play me-1"></i>Démarrer Temps Réel
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div id="recentActivitiesList">
+                                        <!-- Activité 1 -->
+                                        <div class="activity-item d-flex align-items-center mb-3 p-3 bg-light rounded-3">
+                                            <div class="activity-icon bg-success bg-opacity-10 rounded-circle p-3 me-3">
+                                                <i class="fas fa-file-upload text-success"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="activity-title fw-semibold text-dark">Document numérisé</div>
+                                                <div class="activity-description text-muted">Radiographie de Youssef Tazi</div>
+                                            </div>
+                                            <div class="activity-time text-muted">
+                                                <i class="fas fa-clock me-1"></i>Il y a 2 minutes
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Activité 2 -->
+                                        <div class="activity-item d-flex align-items-center mb-3 p-3 bg-light rounded-3">
+                                            <div class="activity-icon bg-primary bg-opacity-10 rounded-circle p-3 me-3">
+                                                <i class="fas fa-user-plus text-primary"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="activity-title fw-semibold text-dark">Nouveau patient</div>
+                                                <div class="activity-description text-muted">Khadija Mansouri ajoutée</div>
+                                            </div>
+                                            <div class="activity-time text-muted">
+                                                <i class="fas fa-clock me-1"></i>Il y a 15 minutes
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Activité 3 -->
+                                        <div class="activity-item d-flex align-items-center mb-3 p-3 bg-light rounded-3">
+                                            <div class="activity-icon bg-warning bg-opacity-10 rounded-circle p-3 me-3">
+                                                <i class="fas fa-robot text-warning"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="activity-title fw-semibold text-dark">Traitement IA</div>
+                                                <div class="activity-description text-muted">Analyse automatique terminée</div>
+                                            </div>
+                                            <div class="activity-time text-muted">
+                                                <i class="fas fa-clock me-1"></i>Il y a 30 minutes
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Activité 4 -->
+                                        <div class="activity-item d-flex align-items-center mb-3 p-3 bg-light rounded-3">
+                                            <div class="activity-icon bg-info bg-opacity-10 rounded-circle p-3 me-3">
+                                                <i class="fas fa-sign-in-alt text-info"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="activity-title fw-semibold text-dark">Connexion utilisateur</div>
+                                                <div class="activity-description text-muted">Dr. Ahmed Benali s'est connecté</div>
+                                            </div>
+                                            <div class="activity-time text-muted">
+                                                <i class="fas fa-clock me-1"></i>Il y a 1 heure
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Activité 5 -->
+                                        <div class="activity-item d-flex align-items-center mb-3 p-3 bg-light rounded-3">
+                                            <div class="activity-icon bg-danger bg-opacity-10 rounded-circle p-3 me-3">
+                                                <i class="fas fa-trash text-danger"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="activity-title fw-semibold text-dark">Document supprimé</div>
+                                                <div class="activity-description text-muted">Document obsolète supprimé</div>
+                                            </div>
+                                            <div class="activity-time text-muted">
+                                                <i class="fas fa-clock me-1"></i>Il y a 2 heures
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Nouvelles Sections Améliorées -->
+                    <div class="row mb-4">
+                        <!-- Performances IA -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-brain me-2"></i>Performances IA</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col-4">
+                                            <div class="ai-stat">
+                                                <div class="ai-stat-number">94%</div>
+                                                <div class="ai-stat-label">Précision</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="ai-stat">
+                                                <div class="ai-stat-number">2.3s</div>
+                                                <div class="ai-stat-label">Temps Moyen</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="ai-stat">
+                                                <div class="ai-stat-number">1,247</div>
+                                                <div class="ai-stat-label">Documents Analysés</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Efficacité du traitement</span>
+                                            <span>89%</span>
+                                        </div>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar bg-gradient-success" style="width: 89%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Statistiques Avancées -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-chart-line me-2"></i>Statistiques Avancées</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-6 mb-3">
+                                            <div class="stat-item">
+                                                <div class="stat-icon bg-primary">
+                                                    <i class="fas fa-file-pdf"></i>
+                                                </div>
+                                                <div class="stat-content">
+                                                    <div class="stat-number">456</div>
+                                                    <div class="stat-label">PDF Générés</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <div class="stat-item">
+                                                <div class="stat-icon bg-success">
+                                                    <i class="fas fa-search"></i>
+                                                </div>
+                                                <div class="stat-content">
+                                                    <div class="stat-number">1,892</div>
+                                                    <div class="stat-label">Recherches IA</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <div class="stat-item">
+                                                <div class="stat-icon bg-warning">
+                                                    <i class="fas fa-sync"></i>
+                                                </div>
+                                                <div class="stat-content">
+                                                    <div class="stat-number">98.7%</div>
+                                                    <div class="stat-label">Uptime</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <div class="stat-item">
+                                                <div class="stat-icon bg-info">
+                                                    <i class="fas fa-users"></i>
+                                                </div>
+                                                <div class="stat-content">
+                                                    <div class="stat-number">24</div>
+                                                    <div class="stat-label">Utilisateurs Actifs</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Section Actions Rapides -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-bolt me-2"></i>Actions Rapides</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-2 col-sm-4 col-6 mb-3">
+                                            <div class="quick-action" onclick="showPage('scanner')">
+                                                <div class="quick-action-icon bg-primary">
+                                                    <i class="fas fa-camera"></i>
+                                                </div>
+                                                <div class="quick-action-label">Scanner</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 col-sm-4 col-6 mb-3">
+                                            <div class="quick-action" onclick="showAddPatientModal()">
+                                                <div class="quick-action-icon bg-success">
+                                                    <i class="fas fa-user-plus"></i>
+                                                </div>
+                                                <div class="quick-action-label">Nouveau Patient</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 col-sm-4 col-6 mb-3">
+                                            <div class="quick-action" onclick="showUploadDocumentModal()">
+                                                <div class="quick-action-icon bg-info">
+                                                    <i class="fas fa-upload"></i>
+                                                </div>
+                                                <div class="quick-action-label">Importer Document</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 col-sm-4 col-6 mb-3">
+                                            <div class="quick-action" onclick="showCreateReportModal()">
+                                                <div class="quick-action-icon bg-warning">
+                                                    <i class="fas fa-file-medical"></i>
+                                                </div>
+                                                <div class="quick-action-label">Nouveau Rapport</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 col-sm-4 col-6 mb-3">
+                                            <div class="quick-action" onclick="showAddUserModal()">
+                                                <div class="quick-action-icon bg-secondary">
+                                                    <i class="fas fa-user-cog"></i>
+                                                </div>
+                                                <div class="quick-action-label">Nouvel Utilisateur</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 col-sm-4 col-6 mb-3">
+                                            <div class="quick-action" onclick="showPage('settings')">
+                                                <div class="quick-action-icon bg-dark">
+                                                    <i class="fas fa-cog"></i>
+                                                </div>
+                                                <div class="quick-action-label">Paramètres</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page Patients - Design Moderne -->
+            <div id="patientsPage" class="page-content d-none">
+                <div class="container-fluid">
+                    <!-- Header Section avec Gradient -->
+                    <div class="patients-header mb-5">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="hero-section bg-gradient-primary text-white rounded-4 p-5 shadow-lg">
+                                    <div class="row align-items-center">
+                                        <div class="col-lg-8">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="icon-wrapper bg-white bg-opacity-20 rounded-circle p-3 me-4">
+                                                    <i class="fas fa-users fa-2x"></i>
+                                                </div>
+                                                <div>
+                                                    <h1 class="display-6 fw-bold mb-2">Gestion des Patients</h1>
+                                                    <p class="lead mb-0 opacity-90">Dossier médical numérique complet et sécurisé</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-4 text-lg-end">
+                                            <div class="d-flex flex-column gap-3">
+                                                <button class="btn btn-light btn-lg shadow-sm fw-semibold" onclick="showAddPatientModal()">
+                                                    <i class="fas fa-plus me-2"></i>Nouveau Patient
+                                                </button>
+                                                <button class="btn btn-outline-light btn-lg shadow-sm" onclick="importPatientsCSV()">
+                                                    <i class="fas fa-file-import me-2"></i>Importer CSV
+                                                </button>
+                                                <button class="btn btn-outline-light btn-sm shadow-sm" onclick="app.exportPatientsToExcel()">
+                                                    <i class="fas fa-file-excel me-2"></i>Exporter Tous
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistiques Cards Modernes -->
+                    <div class="row g-4 mb-5">
+                        <div class="col-xl-3 col-lg-6 col-md-6">
+                            <div class="stats-card bg-white rounded-4 p-4 shadow-sm h-100 border-start border-5 border-primary">
+                                <div class="d-flex align-items-center">
+                                    <div class="stats-icon bg-primary bg-opacity-10 rounded-3 p-3 me-3">
+                                        <i class="fas fa-users fa-lg text-primary"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h3 class="fw-bold mb-1 text-dark" id="totalPatientsCount">0</h3>
+                                        <p class="text-muted mb-0 fw-medium">Total Patients</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-6 col-md-6">
+                            <div class="stats-card bg-white rounded-4 p-4 shadow-sm h-100 border-start border-5 border-success">
+                                <div class="d-flex align-items-center">
+                                    <div class="stats-icon bg-success bg-opacity-10 rounded-3 p-3 me-3">
+                                        <i class="fas fa-user-check fa-lg text-success"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h3 class="fw-bold mb-1 text-dark" id="activePatientsCount">0</h3>
+                                        <p class="text-muted mb-0 fw-medium">Patients Actifs</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-6 col-md-6">
+                            <div class="stats-card bg-white rounded-4 p-4 shadow-sm h-100 border-start border-5 border-info">
+                                <div class="d-flex align-items-center">
+                                    <div class="stats-icon bg-info bg-opacity-10 rounded-3 p-3 me-3">
+                                        <i class="fas fa-user-plus fa-lg text-info"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h3 class="fw-bold mb-1 text-dark" id="newPatientsToday">0</h3>
+                                        <p class="text-muted mb-0 fw-medium">Nouveaux Aujourd'hui</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-6 col-md-6">
+                            <div class="stats-card bg-white rounded-4 p-4 shadow-sm h-100 border-start border-5 border-warning">
+                                <div class="d-flex align-items-center">
+                                    <div class="stats-icon bg-warning bg-opacity-10 rounded-3 p-3 me-3">
+                                        <i class="fas fa-file-medical fa-lg text-warning"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h3 class="fw-bold mb-1 text-dark" id="patientsWithDocuments">0</h3>
+                                        <p class="text-muted mb-0 fw-medium">Avec Documents</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section Filtres et Recherche -->
+                    <div class="filters-section mb-4">
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-header bg-white border-0 p-4">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <h5 class="mb-0 fw-bold text-dark">
+                                        <i class="fas fa-search me-2 text-primary"></i>Recherche et Filtres
+                                    </h5>
+                                    <button class="btn btn-outline-secondary btn-sm rounded-pill" onclick="clearPatientFilters()">
+                                        <i class="fas fa-undo me-1"></i>Reset
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="row g-3">
+                                    <div class="col-lg-4 col-md-6">
+                                        <div class="search-input-wrapper position-relative">
+                                            <i class="fas fa-search search-icon position-absolute"></i>
+                                            <input type="text" class="form-control form-control-lg ps-5 rounded-pill" 
+                                                   id="patientSearch" placeholder="Rechercher par nom, prénom, CI...">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2 col-md-6">
+                                        <select class="form-select form-select-lg rounded-pill" id="patientStatus">
+                                            <option value="">Tous les statuts</option>
+                                            <option value="active">Actif</option>
+                                            <option value="inactive">Inactif</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-2 col-md-6">
+                                        <select class="form-select form-select-lg rounded-pill" id="patientGender">
+                                            <option value="">Tous les genres</option>
+                                            <option value="male">Homme</option>
+                                            <option value="female">Femme</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-2 col-md-6">
+                                        <select class="form-select form-select-lg rounded-pill" id="patientAge">
+                                            <option value="">Tous les âges</option>
+                                            <option value="0-18">0-18 ans</option>
+                                            <option value="19-65">19-65 ans</option>
+                                            <option value="65+">65+ ans</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-2 col-md-6">
+                                        <button class="btn btn-primary btn-lg w-100 rounded-pill fw-semibold" onclick="exportPatientsCSV()">
+                                            <i class="fas fa-download me-2"></i>Exporter
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Table des Patients améliorée -->
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white border-bottom">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Liste des Patients</h5>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="clearPatientFilters()">
+                                        <i class="fas fa-undo me-1"></i>Reset Filtres
+                                    </button>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="exportPatientsCSV()">
+                                        <i class="fas fa-download me-1"></i>Exporter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="border-0">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-id-card me-2 text-primary"></i>
+                                                    ID Patient
+                                                </div>
+                                            </th>
+                                            <th class="border-0">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-credit-card me-2 text-primary"></i>
+                                                    Carte d'Identité
+                                                </div>
+                                            </th>
+                                            <th class="border-0">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-user me-2 text-primary"></i>
+                                                    Nom Complet
+                                                </div>
+                                            </th>
+                                            <th class="border-0">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-birthday-cake me-2 text-primary"></i>
+                                                    Date de naissance
+                                                </div>
+                                            </th>
+                                            <th class="border-0">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-clock me-2 text-primary"></i>
+                                                    Âge
+                                                </div>
+                                            </th>
+                                            <th class="border-0">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-venus-mars me-2 text-primary"></i>
+                                                    Genre
+                                                </div>
+                                            </th>
+                                            <th class="border-0">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-phone me-2 text-primary"></i>
+                                                    Téléphone
+                                                </div>
+                                            </th>
+                                            <th class="border-0">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-file-medical me-2 text-primary"></i>
+                                                    Documents
+                                                </div>
+                                            </th>
+                                            <th class="border-0">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-info-circle me-2 text-primary"></i>
+                                                    Statut
+                                                </div>
+                                            </th>
+                                            <th class="border-0 text-center">
+                                                <div class="d-flex align-items-center justify-content-center">
+                                                    <i class="fas fa-cogs me-2 text-primary"></i>
+                                                    Actions
+                                                </div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="patientsTableBody">
+                                        <!-- Les patients seront chargés ici -->
+                                        <tr>
+                                            <td colspan="9" class="text-center py-5">
+                                                <div class="text-muted">
+                                                    <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
+                                                    <p>Chargement des patients...</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="text-muted">
+                                    <span id="patientsCount">0</span> patient(s) trouvé(s)
+                            </div>
+                            <div id="patientsPagination">
+                                <!-- La pagination sera générée ici -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page Documents -->
+            <div id="documentsPage" class="page-content d-none">
+                <div class="container-fluid">
+                    <div class="page-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h1><i class="fas fa-file-medical me-2"></i>Documents Médicaux</h1>
+                                <p class="text-muted">Numérisation et gestion intelligente des documents</p>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-warning" onclick="showDocumentAnalytics()">
+                                    <i class="fas fa-chart-pie me-2"></i>Analytics
+                                </button>
+                                <button class="btn btn-info" onclick="startBatchScan()">
+                                    <i class="fas fa-layer-group me-2"></i>Scan en Lot
+                                </button>
+                                <button class="btn btn-success" onclick="bulkProcessDocuments()">
+                                    <i class="fas fa-robot me-2"></i>Traitement IA
+                                </button>
+                                <button class="btn btn-primary" onclick="showUploadDocumentModal()">
+                                    <i class="fas fa-upload me-2"></i>Importer Document
+                                </button>
+                                <button class="btn btn-outline-success btn-sm" onclick="app.exportDocumentsToExcel()">
+                                    <i class="fas fa-file-excel me-2"></i>Exporter Tous
+                                </button>
+                                <button class="btn btn-secondary" onclick="showDocumentTemplates()">
+                                    <i class="fas fa-file-import me-2"></i>Templates
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Filtres Documents -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="search-box">
+                                        <i class="fas fa-search search-icon"></i>
+                                        <input type="text" class="form-control" id="documentSearch" 
+                                               placeholder="Rechercher un document...">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-select" id="documentType">
+                                        <option value="">Tous les types</option>
+                                        <option value="medical_record">Dossier Médical</option>
+                                        <option value="prescription">Ordonnance</option>
+                                        <option value="lab_results">Résultats Labo</option>
+                                        <option value="xray">Radiographie</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-select" id="documentStatus">
+                                        <option value="">Tous les statuts</option>
+                                        <option value="pending_review">En révision</option>
+                                        <option value="approved">Approuvé</option>
+                                        <option value="rejected">Rejeté</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-select" id="documentPriority">
+                                        <option value="">Toutes priorités</option>
+                                        <option value="urgent">Urgent</option>
+                                        <option value="high">Élevée</option>
+                                        <option value="medium">Moyenne</option>
+                                        <option value="low">Faible</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-outline-info" onclick="aiAnalyzeAll()">
+                                            <i class="fas fa-robot me-1"></i>IA
+                                        </button>
+                                        <button class="btn btn-outline-secondary" onclick="clearDocumentFilters()">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Grille des Documents -->
+                    <div class="row documents-grid" id="documentsGrid">
+                        <!-- Les documents seront chargés ici -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page Scanner -->
+            <div id="scannerPage" class="page-content d-none">
+                <div class="container-fluid">
+                    <div class="page-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h1><i class="fas fa-camera me-2"></i>Scanner Intelligent</h1>
+                                <p class="text-muted">Numérisation et traitement automatique des documents</p>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-info" onclick="toggleFullscreen()" id="fullscreenBtn">
+                                    <i class="fas fa-expand me-2"></i>Plein Écran
+                                </button>
+                                <button class="btn btn-warning" onclick="rotateImage()" id="rotateBtn">
+                                    <i class="fas fa-redo me-2"></i>Rotation
+                                </button>
+                                <button class="btn btn-success" onclick="startCamera()">
+                                    <i class="fas fa-video me-2"></i>Caméra
+                                </button>
+                                <button class="btn btn-primary" onclick="uploadFile()">
+                                    <i class="fas fa-upload me-2"></i>Upload
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Zone de Scanner -->
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5><i class="fas fa-camera me-2"></i>Zone de Numérisation</h5>
+                                    <div class="scan-actions">
+                                        <button class="btn btn-sm btn-outline-primary me-2" onclick="toggleFullscreen()">
+                                            <i class="fas fa-expand"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-warning" onclick="rotateImage()">
+                                            <i class="fas fa-redo"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="scan-area" id="scanArea">
+                                        <div class="scan-preview" id="scanPreview">
+                                            <div class="scan-placeholder">
+                                                <i class="fas fa-camera fa-3x text-muted mb-3"></i>
+                                                <h5>Prêt pour la numérisation</h5>
+                                                <p class="text-muted">Cliquez sur "Démarrer la numérisation" ou glissez-déposez un fichier</p>
+                                                <div class="scan-buttons mt-3">
+                                                    <button class="btn btn-primary btn-lg" onclick="startScanning()">
+                                                        <i class="fas fa-play me-2"></i>Démarrer la numérisation
+                                                    </button>
+                                                    <button class="btn btn-success btn-lg ms-2" onclick="testCaptureAndForm()">
+                                                        <i class="fas fa-flask me-2"></i>Test Rapide
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Image capturée -->
+                                        <div class="captured-image d-none" id="capturedImage">
+                                            <img id="scannedImage" class="img-fluid" alt="Document scanné">
+                                            <div class="image-overlay">
+                                                <div class="image-controls">
+                                                    <button class="btn btn-sm btn-light me-2" onclick="enhanceImage()">
+                                                        <i class="fas fa-magic me-1"></i>Améliorer
+                                                    </button>
+                                                    <button class="btn btn-sm btn-light me-2" onclick="adjustBrightness()">
+                                                        <i class="fas fa-adjust me-1"></i>Luminosité
+                                                    </button>
+                                                    <button class="btn btn-sm btn-light me-2" onclick="adjustContrast()">
+                                                        <i class="fas fa-sliders-h me-1"></i>Contraste
+                                                    </button>
+                                                    <button class="btn btn-sm btn-danger" onclick="removeImage()">
+                                                        <i class="fas fa-trash me-1"></i>Supprimer
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Zone de drop pour fichiers -->
+                                        <div class="drop-zone d-none" id="dropZone">
+                                            <div class="drop-content">
+                                                <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                                                <h5>Déposez votre fichier ici</h5>
+                                                <p class="text-muted">Formats supportés: JPG, PNG, PDF</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-list me-2"></i>Progression du Traitement</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="processing-steps">
+                                        <div class="processing-step" id="step1">
+                                            <div class="step-icon">
+                                                <i class="fas fa-camera"></i>
+                                            </div>
+                                            <div class="step-content">
+                                                <h6>Numérisation</h6>
+                                                <p>Acquisition du document</p>
+                                                <div class="step-status">
+                                                    <span class="badge bg-secondary">En attente</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="processing-step" id="step2">
+                                            <div class="step-icon">
+                                                <i class="fas fa-check-circle"></i>
+                                            </div>
+                                            <div class="step-content">
+                                                <h6>Validation</h6>
+                                                <p>Vérification qualité</p>
+                                                <div class="step-status">
+                                                    <span class="badge bg-secondary">En attente</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="processing-step" id="step3">
+                                            <div class="step-icon">
+                                                <i class="fas fa-tag"></i>
+                                            </div>
+                                            <div class="step-content">
+                                                <h6>Classification</h6>
+                                                <p>Identification du type</p>
+                                                <div class="step-status">
+                                                    <span class="badge bg-secondary">En attente</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="processing-step" id="step4">
+                                            <div class="step-icon">
+                                                <i class="fas fa-cog"></i>
+                                            </div>
+                                            <div class="step-content">
+                                                <h6>Reconnaissance</h6>
+                                                <p>Extraction du texte</p>
+                                                <div class="step-status">
+                                                    <span class="badge bg-secondary">En attente</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="processing-step" id="step5">
+                                            <div class="step-icon">
+                                                <i class="fas fa-search"></i>
+                                            </div>
+                                            <div class="step-content">
+                                                <h6>Indexation</h6>
+                                                <p>Création métadonnées</p>
+                                                <div class="step-status">
+                                                    <span class="badge bg-secondary">En attente</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="processing-step" id="step6">
+                                            <div class="step-icon">
+                                                <i class="fas fa-folder"></i>
+                                            </div>
+                                            <div class="step-content">
+                                                <h6>Archivage</h6>
+                                                <p>Stockage sécurisé</p>
+                                                <div class="step-status">
+                                                    <span class="badge bg-secondary">En attente</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Paramètres de scan -->
+                                    <div class="mt-4">
+                                        <h6><i class="fas fa-cogs me-2"></i>Paramètres</h6>
+                                        <div class="mb-3">
+                                            <label class="form-label">Qualité</label>
+                                            <select class="form-select" id="scanQuality">
+                                                <option value="high">Haute (300 DPI)</option>
+                                                <option value="medium" selected>Moyenne (150 DPI)</option>
+                                                <option value="low">Basse (75 DPI)</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Format</label>
+                                            <select class="form-select" id="scanFormat">
+                                                <option value="pdf">PDF</option>
+                                                <option value="jpg" selected>JPEG</option>
+                                                <option value="png">PNG</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="autoProcess" checked>
+                                            <label class="form-check-label" for="autoProcess">
+                                                Traitement automatique IA
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="autoSave" checked>
+                                            <label class="form-check-label" for="autoSave">
+                                                Sauvegarde automatique
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page Rapports -->
+            <div id="reportsPage" class="page-content d-none">
+                <div class="container-fluid">
+                    <div class="page-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h1><i class="fas fa-chart-line me-2"></i>Rapports Intelligents</h1>
+                                <p class="text-muted">Analyse et génération automatique de rapports</p>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-warning" onclick="showAIAnalyticsModal()">
+                                    <i class="fas fa-brain me-2"></i>Analytics IA
+                                </button>
+                                <button class="btn btn-success" onclick="generateAIReport()">
+                                    <i class="fas fa-robot me-2"></i>Rapport IA
+                                </button>
+                                <button class="btn btn-primary" onclick="showCreateReportModal()">
+                                    <i class="fas fa-plus me-2"></i>Nouveau Rapport
+                                </button>
+                                <button class="btn btn-info" onclick="showReportTemplates()">
+                                    <i class="fas fa-file-alt me-2"></i>Templates
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Statistiques IA -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card stats-card ai-card">
+                                <div class="card-body text-center">
+                                    <div class="stats-icon ai-icon">
+                                        <i class="fas fa-robot"></i>
+                                    </div>
+                                    <h3 class="stats-number" id="aiReportsCount">0</h3>
+                                    <p class="stats-label">Rapports IA</p>
+                                    <div class="stats-trend">
+                                        <i class="fas fa-arrow-up text-success"></i>
+                                        <span class="text-success">+12%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stats-card accuracy-card">
+                                <div class="card-body text-center">
+                                    <div class="stats-icon accuracy-icon">
+                                        <i class="fas fa-bullseye"></i>
+                                    </div>
+                                    <h3 class="stats-number" id="aiAccuracy">94%</h3>
+                                    <p class="stats-label">Précision IA</p>
+                                    <div class="stats-trend">
+                                        <i class="fas fa-arrow-up text-success"></i>
+                                        <span class="text-success">+3%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stats-card insights-card">
+                                <div class="card-body text-center">
+                                    <div class="stats-icon insights-icon">
+                                        <i class="fas fa-lightbulb"></i>
+                                    </div>
+                                    <h3 class="stats-number" id="insightsGenerated">156</h3>
+                                    <p class="stats-label">Insights Générés</p>
+                                    <div class="stats-trend">
+                                        <i class="fas fa-arrow-up text-success"></i>
+                                        <span class="text-success">+28%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stats-card time-card">
+                                <div class="card-body text-center">
+                                    <div class="stats-icon time-icon">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <h3 class="stats-number" id="avgProcessingTime">2.3s</h3>
+                                    <p class="stats-label">Temps Moyen</p>
+                                    <div class="stats-trend">
+                                        <i class="fas fa-arrow-down text-success"></i>
+                                        <span class="text-success">-15%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <!-- Liste des Rapports -->
+                    <div class="row reports-list" id="reportsList">
+                        <!-- Les rapports seront chargés ici -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page Utilisateurs -->
+            <div id="usersPage" class="page-content d-none">
+                <div class="container-fluid">
+                    <div class="page-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h1><i class="fas fa-user-cog me-2"></i>Gestion des Utilisateurs</h1>
+                                <p class="text-muted">Gérer les utilisateurs et leurs permissions</p>
+                            </div>
+                            <button class="btn btn-primary" onclick="showAddUserModal()">
+                                <i class="fas fa-user-plus me-2"></i>Nouvel Utilisateur
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Table des Utilisateurs -->
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover users-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Utilisateur</th>
+                                            <th>Email</th>
+                                            <th>Rôle</th>
+                                            <th>Département</th>
+                                            <th>Dernière connexion</th>
+                                            <th>Statut</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="usersTableBody">
+                                        <!-- Les utilisateurs seront chargés ici -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page Paramètres -->
+            <div id="settingsPage" class="page-content d-none">
+                <div class="container-fluid">
+                    <div class="page-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h1><i class="fas fa-cog me-2"></i>Paramètres Système</h1>
+                                <p class="text-muted">Configuration de la plateforme de numérisation</p>
+                            </div>
+                            <button class="btn btn-primary" onclick="saveAllSettings()">
+                                <i class="fas fa-save me-2"></i>Sauvegarder
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Contenu des Paramètres -->
+                    <form id="settingsForm">
+                    <div class="row">
+                        <!-- Apparence -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card settings-card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-palette me-2"></i>Apparence et Interface</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-semibold">Thème</label>
+                                            <select class="form-select" id="themeSelect" onchange="changeTheme()">
+                                                <option value="light">🌞 Clair</option>
+                                                <option value="dark">🌙 Sombre</option>
+                                                <option value="auto">🔄 Automatique</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-semibold">Langue</label>
+                                            <select class="form-select" id="languageSelect" onchange="changeLanguage()">
+                                                <option value="fr">🇫🇷 Français</option>
+                                                <option value="ar">🇲🇦 العربية</option>
+                                                <option value="en">🇺🇸 English</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Couleur d'accent</label>
+                                        <div class="d-flex gap-2">
+                                            <div class="color-option active" data-color="#2563eb" style="background: #2563eb;" onclick="changeAccentColor('#2563eb')"></div>
+                                            <div class="color-option" data-color="#059669" style="background: #059669;" onclick="changeAccentColor('#059669')"></div>
+                                            <div class="color-option" data-color="#dc2626" style="background: #dc2626;" onclick="changeAccentColor('#dc2626')"></div>
+                                            <div class="color-option" data-color="#d97706" style="background: #d97706;" onclick="changeAccentColor('#d97706')"></div>
+                                            <div class="color-option" data-color="#7c3aed" style="background: #7c3aed;" onclick="changeAccentColor('#7c3aed')"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- IA et Numérisation -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card settings-card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-robot me-2"></i>Intelligence Artificielle</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="aiProcessing" checked>
+                                        <label class="form-check-label" for="aiProcessing">
+                                            <i class="fas fa-brain me-2"></i>Traitement automatique IA
+                                        </label>
+                                        <small class="text-muted d-block">Analyse automatique des documents</small>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="ocrProcessing" checked>
+                                        <label class="form-check-label" for="ocrProcessing">
+                                            <i class="fas fa-text-width me-2"></i>Reconnaissance OCR
+                                        </label>
+                                        <small class="text-muted d-block">Extraction automatique du texte</small>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="smartClassification" checked>
+                                        <label class="form-check-label" for="smartClassification">
+                                            <i class="fas fa-tags me-2"></i>Classification intelligente
+                                        </label>
+                                        <small class="text-muted d-block">Catégorisation automatique</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Niveau de confiance IA</label>
+                                        <select class="form-select" id="aiConfidence">
+                                            <option value="high">Élevé (95%+)</option>
+                                            <option value="medium" selected>Moyen (80%+)</option>
+                                            <option value="low">Faible (60%+)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notifications -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card settings-card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-bell me-2"></i>Notifications</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                                        <label class="form-check-label" for="emailNotifications">
+                                            <i class="fas fa-envelope me-2"></i>Notifications par email
+                                        </label>
+                                        <small class="text-muted d-block">Recevoir les alertes par email</small>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="pushNotifications" checked>
+                                        <label class="form-check-label" for="pushNotifications">
+                                            <i class="fas fa-mobile-alt me-2"></i>Notifications push
+                                        </label>
+                                        <small class="text-muted d-block">Notifications dans le navigateur</small>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="alertSounds">
+                                        <label class="form-check-label" for="alertSounds">
+                                            <i class="fas fa-volume-up me-2"></i>Sons d'alerte
+                                        </label>
+                                        <small class="text-muted d-block">Jouer des sons pour les alertes</small>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="loginAlerts" checked>
+                                        <label class="form-check-label" for="loginAlerts">
+                                            <i class="fas fa-shield-alt me-2"></i>Alertes de connexion
+                                        </label>
+                                        <small class="text-muted d-block">Notifications de connexions suspectes</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Fréquence des rapports</label>
+                                        <select class="form-select" id="notificationFrequency">
+                                            <option value="immediate">Immédiate</option>
+                                            <option value="hourly">Toutes les heures</option>
+                                            <option value="daily" selected>Quotidienne</option>
+                                            <option value="weekly">Hebdomadaire</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sécurité -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card settings-card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-shield-alt me-2"></i>Sécurité</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="twoFactorAuth">
+                                        <label class="form-check-label" for="twoFactorAuth">
+                                            <i class="fas fa-key me-2"></i>Authentification à deux facteurs
+                                        </label>
+                                        <small class="text-muted d-block">Sécurité renforcée pour votre compte</small>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="autoSave" checked>
+                                        <label class="form-check-label" for="autoSave">
+                                            <i class="fas fa-save me-2"></i>Sauvegarde automatique
+                                        </label>
+                                        <small class="text-muted d-block">Sauvegarder automatiquement les modifications</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Durée de session (minutes)</label>
+                                        <input type="number" class="form-control" id="sessionDuration" value="480" min="30" max="1440">
+                                        <small class="text-muted">Durée avant déconnexion automatique</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Format de date</label>
+                                        <select class="form-select" id="dateFormat">
+                                            <option value="dd/mm/yyyy" selected>DD/MM/YYYY</option>
+                                            <option value="mm/dd/yyyy">MM/DD/YYYY</option>
+                                            <option value="yyyy-mm-dd">YYYY-MM-DD</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Fuseau horaire</label>
+                                        <select class="form-select" id="timezone">
+                                            <option value="Africa/Casablanca" selected>Casablanca (GMT+1)</option>
+                                            <option value="Europe/Paris">Paris (GMT+1)</option>
+                                            <option value="UTC">UTC (GMT+0)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scanner et Qualité -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card settings-card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-scanner me-2"></i>Scanner et Qualité</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Qualité de numérisation</label>
+                                        <select class="form-select" id="scanQuality">
+                                            <option value="low">Faible (Rapide)</option>
+                                            <option value="medium" selected>Moyenne (Équilibrée)</option>
+                                            <option value="high">Élevée (Lente)</option>
+                                            <option value="ultra">Ultra (Maximum)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="animationsEnabled" checked>
+                                        <label class="form-check-label" for="animationsEnabled">
+                                            <i class="fas fa-magic me-2"></i>Animations
+                                        </label>
+                                        <small class="text-muted d-block">Activer les animations de l'interface</small>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="compactMode">
+                                        <label class="form-check-label" for="compactMode">
+                                            <i class="fas fa-compress me-2"></i>Mode compact
+                                        </label>
+                                        <small class="text-muted d-block">Interface plus dense</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Résolution par défaut</label>
+                                        <select class="form-select" id="defaultResolution">
+                                            <option value="300">300 DPI (Standard)</option>
+                                            <option value="600" selected>600 DPI (Haute qualité)</option>
+                                            <option value="1200">1200 DPI (Professionnel)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sauvegarde et Maintenance -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card settings-card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-tools me-2"></i>Sauvegarde et Maintenance</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-grid gap-2 mb-3">
+                                        <button class="btn btn-success" onclick="exportData()">
+                                            <i class="fas fa-download me-2"></i>Exporter les données
+                                        </button>
+                                        <button class="btn btn-warning" onclick="importBackup()">
+                                            <i class="fas fa-upload me-2"></i>Importer une sauvegarde
+                                        </button>
+                                        <button class="btn btn-info" onclick="clearCache()">
+                                            <i class="fas fa-broom me-2"></i>Vider le cache
+                                        </button>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Dernière sauvegarde</label>
+                                        <input type="text" class="form-control" id="lastBackup" readonly value="Jamais">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Utilisation du stockage</label>
+                                        <input type="text" class="form-control" id="diskUsage" readonly value="Calcul...">
+                                    </div>
+                                    <div class="d-grid">
+                                        <button class="btn btn-danger" onclick="resetSettings()">
+                                            <i class="fas fa-undo me-2"></i>Réinitialiser les paramètres
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Système -->
+                        <div class="col-lg-12 mb-4">
+                            <div class="card settings-card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-server me-2"></i>Informations Système</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col-md-2">
+                                            <div class="system-info-item">
+                                                <div class="stats-icon bg-primary" style="width: 50px; height: 50px; font-size: 1.2rem; margin: 0 auto;">
+                                                    <i class="fas fa-info-circle"></i>
+                                                </div>
+                                                <h6 class="fw-bold mt-2">Version</h6>
+                                                <p class="text-muted">v2.0.0</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="system-info-item">
+                                                <div class="stats-icon bg-success" style="width: 50px; height: 50px; font-size: 1.2rem; margin: 0 auto;">
+                                                    <i class="fas fa-database"></i>
+                                                </div>
+                                                <h6 class="fw-bold mt-2">Base de données</h6>
+                                                <p class="text-muted">Connectée</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="system-info-item">
+                                                <div class="stats-icon bg-warning" style="width: 50px; height: 50px; font-size: 1.2rem; margin: 0 auto;">
+                                                    <i class="fas fa-clock"></i>
+                                                </div>
+                                                <h6 class="fw-bold mt-2">Uptime</h6>
+                                                <p class="text-muted" id="systemUptime">2h 45m</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="system-info-item">
+                                                <div class="stats-icon bg-info" style="width: 50px; height: 50px; font-size: 1.2rem; margin: 0 auto;">
+                                                    <i class="fas fa-users"></i>
+                                                </div>
+                                                <h6 class="fw-bold mt-2">Utilisateurs</h6>
+                                                <p class="text-muted" id="totalUsers">4 actifs</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="system-info-item">
+                                                <div class="stats-icon bg-secondary" style="width: 50px; height: 50px; font-size: 1.2rem; margin: 0 auto;">
+                                                    <i class="fas fa-file-medical"></i>
+                                    </div>
+                                                <h6 class="fw-bold mt-2">Documents</h6>
+                                                <p class="text-muted" id="totalDocuments">3</p>
+                                </div>
+                            </div>
+                                        <div class="col-md-2">
+                                            <div class="system-info-item">
+                                                <div class="stats-icon bg-dark" style="width: 50px; height: 50px; font-size: 1.2rem; margin: 0 auto;">
+                                                    <i class="fas fa-robot"></i>
+                        </div>
+                                                <h6 class="fw-bold mt-2">IA Activée</h6>
+                                                <p class="text-muted">Oui</p>
+                    </div>
+                </div>
+            </div>
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6><i class="fas fa-headset me-2"></i>Support Technique</h6>
+                                            <p class="text-muted">Besoin d'aide ? Contactez notre équipe de support.</p>
+                                            <button class="btn btn-outline-primary btn-sm" onclick="contactSupport()">
+                                                <i class="fas fa-life-ring me-2"></i>Contacter le support
+                                            </button>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6><i class="fas fa-chart-line me-2"></i>Logs Système</h6>
+                                            <p class="text-muted">Consultez les logs pour diagnostiquer les problèmes.</p>
+                                            <button class="btn btn-outline-info btn-sm" onclick="viewLogs()">
+                                                <i class="fas fa-list-alt me-2"></i>Voir les logs
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Export des Données -->
+                        <div class="col-12 mb-4">
+                            <div class="card settings-card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-download me-2"></i>Export des Données</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="d-grid">
+                                                <button class="btn btn-outline-success" onclick="app.exportPatientsToExcel()">
+                                                    <i class="fas fa-file-excel me-2"></i>Exporter Patients (Excel)
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="d-grid">
+                                                <button class="btn btn-outline-info" onclick="app.exportDocumentsToExcel()">
+                                                    <i class="fas fa-file-excel me-2"></i>Exporter Documents (Excel)
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="d-grid">
+                                                <button class="btn btn-outline-warning" onclick="app.exportAllData()">
+                                                    <i class="fas fa-download me-2"></i>Exporter Toutes les Données
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="d-grid">
+                                                <button class="btn btn-outline-danger" onclick="confirmDataBackup()">
+                                                    <i class="fas fa-database me-2"></i>Sauvegarde Complète
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-info mt-3">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <strong>Note :</strong> Les exports sont générés au format CSV/Excel et peuvent être ouverts dans Microsoft Excel, LibreOffice Calc ou Google Sheets.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Modal Création de Rapport Intelligent -->
+    <div class="modal fade" id="createReportModal" tabindex="-1" aria-labelledby="createReportModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-gradient-primary text-white">
+                    <h5 class="modal-title" id="createReportModalLabel">
+                        <i class="fas fa-robot me-2"></i>Créer un Rapport Intelligent
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Formulaire de Rapport -->
+                        <div class="col-md-7">
+                            <!-- Section Templates de Rapports -->
+                            <div class="mb-4">
+                                <div class="card">
+                                    <div class="card-header bg-primary text-white">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-file-alt me-2"></i>Templates de Rapports
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <div class="template-card h-100" onclick="useReportTemplate('consultation')">
+                                                    <div class="template-icon">
+                                                        <i class="fas fa-stethoscope"></i>
+                                                    </div>
+                                                    <div class="template-content">
+                                                        <h6 class="template-title">Consultation Générale</h6>
+                                                        <p class="template-description">Template standardisé pour consultation générale</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <div class="template-card h-100" onclick="useReportTemplate('laboratoire')">
+                                                    <div class="template-icon">
+                                                        <i class="fas fa-vial"></i>
+                                                    </div>
+                                                    <div class="template-content">
+                                                        <h6 class="template-title">Résultats Laboratoire</h6>
+                                                        <p class="template-description">Template standardisé pour résultats laboratoire</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <div class="template-card h-100" onclick="useReportTemplate('radiologie')">
+                                                    <div class="template-icon">
+                                                        <i class="fas fa-x-ray"></i>
+                                                    </div>
+                                                    <div class="template-content">
+                                                        <h6 class="template-title">Rapport Radiologique</h6>
+                                                        <p class="template-description">Template standardisé pour rapport radiologique</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <form id="reportForm" class="needs-validation" novalidate>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="reportTitle" class="form-label fw-bold">Titre du Rapport *</label>
+                                        <input type="text" class="form-control" id="reportTitle" required 
+                                               placeholder="Titre du rapport médical">
+                                        <div class="invalid-feedback">Le titre est requis</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="reportType" class="form-label fw-bold">Type de Rapport *</label>
+                                        <select class="form-select" id="reportType" required onchange="updateReportTemplate()">
+                                            <option value="">Sélectionner le type</option>
+                                            <option value="consultation">📋 Consultation</option>
+                                            <option value="laboratory">🧪 Laboratoire</option>
+                                            <option value="radiology">📸 Radiologie</option>
+                                            <option value="examination">🔍 Examen Médical</option>
+                                            <option value="surgery">⚕️ Rapport Chirurgical</option>
+                                            <option value="discharge">🚪 Rapport de Sortie</option>
+                                            <option value="follow_up">📅 Suivi Médical</option>
+                                            <option value="emergency">🚨 Urgence</option>
+                                            <option value="ai_analysis">🤖 Analyse IA</option>
+                                        </select>
+                                        <div class="invalid-feedback">Le type est requis</div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="reportPatient" class="form-label fw-bold">Patient *</label>
+                                        <select class="form-select" id="reportPatient" required onchange="loadPatientInfo()">
+                                            <option value="">Sélectionner un patient</option>
+                                        </select>
+                                        <div class="invalid-feedback">Le patient est requis</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="reportDate" class="form-label fw-bold">Date du Rapport *</label>
+                                        <input type="date" class="form-control" id="reportDate" required>
+                                        <div class="invalid-feedback">La date est requise</div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="reportSummary" class="form-label fw-bold">Résumé Médical *</label>
+                                    <textarea class="form-control" id="reportSummary" rows="4" required
+                                              placeholder="Résumé de la consultation ou de l'examen médical..."></textarea>
+                                    <div class="invalid-feedback">Le résumé est requis</div>
+                                    <small class="text-muted">
+                                        <i class="fas fa-lightbulb me-1"></i>
+                                        L'IA analysera automatiquement votre texte pour générer des suggestions
+                                    </small>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="reportDiagnosis" class="form-label fw-bold">Diagnostic</label>
+                                        <textarea class="form-control" id="reportDiagnosis" rows="3"
+                                                  placeholder="Diagnostic médical..."></textarea>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="reportTreatment" class="form-label fw-bold">Traitement</label>
+                                        <textarea class="form-control" id="reportTreatment" rows="3"
+                                                  placeholder="Plan de traitement..."></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="reportNotes" class="form-label fw-bold">Notes et Observations</label>
+                                    <textarea class="form-control" id="reportNotes" rows="3"
+                                              placeholder="Notes supplémentaires, observations particulières..."></textarea>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="reportPriority" class="form-label fw-bold">Priorité</label>
+                                        <select class="form-select" id="reportPriority">
+                                            <option value="low">🔵 Faible</option>
+                                            <option value="medium" selected>🟡 Moyenne</option>
+                                            <option value="high">🟠 Élevée</option>
+                                            <option value="urgent">🔴 Urgente</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="reportConfidentiality" class="form-label fw-bold">Confidentialité</label>
+                                        <select class="form-select" id="reportConfidentiality">
+                                            <option value="public">🟢 Publique</option>
+                                            <option value="internal" selected>🔵 Interne</option>
+                                            <option value="confidential">🟡 Confidentielle</option>
+                                            <option value="secret">🔴 Secrète</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="reportStatus" class="form-label fw-bold">Statut</label>
+                                        <select class="form-select" id="reportStatus">
+                                            <option value="draft">📝 Brouillon</option>
+                                            <option value="completed" selected>✅ Terminé</option>
+                                            <option value="archived">📦 Archivé</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="enableAIAnalysis" checked>
+                                    <label class="form-check-label" for="enableAIAnalysis">
+                                        <i class="fas fa-robot me-2 text-warning"></i>
+                                        <strong>Activer l'analyse IA automatique</strong>
+                                        <small class="d-block text-muted">
+                                            L'IA analysera le contenu et proposera des améliorations, diagnostics et recommandations
+                                        </small>
+                                    </label>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Panneau IA et Aperçu -->
+                        <div class="col-md-5">
+                            <div class="card h-100">
+                                <div class="card-header bg-warning text-dark">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-brain me-2"></i>Assistant IA Médical
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div id="patientInfoCard" class="patient-info-card d-none mb-3">
+                                        <!-- Informations patient sélectionné -->
+                                    </div>
+
+                                    <div id="aiSuggestionsPanel" class="ai-suggestions-panel">
+                                        <div class="text-center text-muted">
+                                            <i class="fas fa-robot fa-2x mb-2"></i>
+                                            <p>Saisissez du contenu pour obtenir des suggestions IA</p>
+                                        </div>
+                                    </div>
+
+                                    <div id="reportPreview" class="report-preview mt-3 d-none">
+                                        <h6><i class="fas fa-eye me-2"></i>Aperçu du Rapport</h6>
+                                        <div id="previewContent" class="preview-content">
+                                            <!-- Aperçu généré -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="d-grid gap-2">
+                                        <button type="button" class="btn btn-warning btn-sm" onclick="analyzeReportContent()">
+                                            <i class="fas fa-magic me-2"></i>Analyser avec IA
+                                        </button>
+                                        <button type="button" class="btn btn-info btn-sm" onclick="generateAISuggestions()">
+                                            <i class="fas fa-lightbulb me-2"></i>Suggestions IA
+                                        </button>
+                                        <button type="button" class="btn btn-success btn-sm" onclick="generateReportPreview()">
+                                            <i class="fas fa-eye me-2"></i>Aperçu
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Annuler
+                    </button>
+                    <button type="button" class="btn btn-warning me-2" onclick="saveReportAsDraft()">
+                        <i class="fas fa-save me-2"></i>Sauvegarder Brouillon
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="createIntelligentReport()">
+                        <i class="fas fa-robot me-2"></i>Créer Rapport Intelligent
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ajout Patient -->
+    <div class="modal fade" id="addPatientModal" tabindex="-1" aria-labelledby="addPatientModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-gradient-success text-white">
+                    <h5 class="modal-title" id="addPatientModalLabel">
+                        <i class="fas fa-user-plus me-2"></i>Nouveau Patient
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="patientForm" class="needs-validation" novalidate>
+                        <!-- Section: Informations personnelles -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-primary text-white py-2">
+                                <h6 class="mb-0"><i class="fas fa-user me-2"></i>Informations Personnelles</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="patientFirstName" class="form-label fw-bold">Prénom *</label>
+                                        <input type="text" class="form-control" id="patientFirstName" required>
+                                        <div class="invalid-feedback">Le prénom est requis</div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="patientLastName" class="form-label fw-bold">Nom *</label>
+                                        <input type="text" class="form-control" id="patientLastName" required>
+                                        <div class="invalid-feedback">Le nom est requis</div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="patientCI" class="form-label fw-bold">Carte d'Identité *</label>
+                                        <input type="text" class="form-control" id="patientCI" required 
+                                               placeholder="AB123456" maxlength="8">
+                                        <div class="invalid-feedback">La carte d'identité est requise</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="patientDateOfBirth" class="form-label fw-bold">Date de naissance *</label>
+                                        <input type="date" class="form-control" id="patientDateOfBirth" required>
+                                        <div class="invalid-feedback">La date de naissance est requise</div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="patientGender" class="form-label fw-bold">Genre *</label>
+                                        <select class="form-select" id="patientGender" required>
+                                            <option value="">Sélectionner</option>
+                                            <option value="M">Masculin</option>
+                                            <option value="F">Féminin</option>
+                                            <option value="O">Autre</option>
+                                        </select>
+                                        <div class="invalid-feedback">Le genre est requis</div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="patientOccupation" class="form-label fw-bold">Profession</label>
+                                        <input type="text" class="form-control" id="patientOccupation" 
+                                               placeholder="Profession du patient">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="patientMaritalStatus" class="form-label fw-bold">État Civil</label>
+                                        <select class="form-select" id="patientMaritalStatus">
+                                            <option value="">Sélectionner</option>
+                                            <option value="single">Célibataire</option>
+                                            <option value="married">Marié(e)</option>
+                                            <option value="divorced">Divorcé(e)</option>
+                                            <option value="widowed">Veuf/Veuve</option>
+                                            <option value="separated">Séparé(e)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section: Coordonnées -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-info text-white py-2">
+                                <h6 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Coordonnées</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="patientPhone" class="form-label fw-bold">Téléphone</label>
+                                        <input type="tel" class="form-control" id="patientPhone" 
+                                               placeholder="+212 6 XX XX XX XX">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="patientEmail" class="form-label fw-bold">Email</label>
+                                        <input type="email" class="form-control" id="patientEmail" 
+                                               placeholder="patient@email.com">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-8 mb-3">
+                                        <label for="patientAddress" class="form-label fw-bold">Adresse</label>
+                                        <textarea class="form-control" id="patientAddress" rows="2" 
+                                                  placeholder="Adresse complète du patient"></textarea>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="patientCity" class="form-label fw-bold">Ville</label>
+                                        <input type="text" class="form-control" id="patientCity" 
+                                               placeholder="Fès">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="patientEmergencyContact" class="form-label fw-bold">Contact d'Urgence</label>
+                                    <input type="tel" class="form-control" id="patientEmergencyContact" 
+                                           placeholder="+212 6 XX XX XX XX">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section: Informations médicales -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-danger text-white py-2">
+                                <h6 class="mb-0"><i class="fas fa-heartbeat me-2"></i>Informations Médicales</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="patientBloodType" class="form-label fw-bold">Groupe Sanguin *</label>
+                                        <select class="form-select" id="patientBloodType" required>
+                                            <option value="">Sélectionner un groupe</option>
+                                            <option value="A+">A+</option>
+                                            <option value="A-">A-</option>
+                                            <option value="B+">B+</option>
+                                            <option value="B-">B-</option>
+                                            <option value="AB+">AB+</option>
+                                            <option value="AB-">AB-</option>
+                                            <option value="O+">O+</option>
+                                            <option value="O-">O-</option>
+                                        </select>
+                                        <div class="invalid-feedback">Le groupe sanguin est requis</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="patientInsurance" class="form-label fw-bold">Assurance</label>
+                                        <input type="text" class="form-control" id="patientInsurance" 
+                                               placeholder="CNSS, RAMED, Privée...">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="patientAllergies" class="form-label fw-bold">Allergies connues</label>
+                                        <textarea class="form-control" id="patientAllergies" rows="3" 
+                                                  placeholder="Liste des allergies connues (médicaments, aliments, autres)"></textarea>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="patientMedicalHistory" class="form-label fw-bold">Antécédents Médicaux</label>
+                                        <textarea class="form-control" id="patientMedicalHistory" rows="3" 
+                                                  placeholder="Maladies chroniques, opérations, hospitalisations..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="patientNotes" class="form-label fw-bold">Notes Médicales</label>
+                                    <textarea class="form-control" id="patientNotes" rows="4" 
+                                              placeholder="Notes importantes sur le patient, traitements en cours, observations..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Annuler
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="saveNewPatient()">
+                        <i class="fas fa-user-plus me-2"></i>Créer Patient
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Formulaire Scanner -->
+    <div class="modal fade" id="scannerDetailsModal" tabindex="-1" aria-labelledby="scannerDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-gradient-info text-white">
+                    <h5 class="modal-title" id="scannerDetailsModalLabel">
+                        <i class="fas fa-file-medical me-2"></i>Détails du Document Scanné
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Aperçu du document -->
+                        <div class="col-md-5">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6><i class="fas fa-eye me-2"></i>Aperçu du Document</h6>
+                                </div>
+                                <div class="card-body text-center">
+                                    <img id="modalScannedImage" class="img-fluid rounded" alt="Document scanné" style="max-height: 300px;">
+                                    <div class="mt-3">
+                                        <button class="btn btn-sm btn-outline-primary me-2" onclick="enhanceImage()">
+                                            <i class="fas fa-magic me-1"></i>Améliorer
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-warning me-2" onclick="rotateImage()">
+                                            <i class="fas fa-redo me-1"></i>Rotation
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info" onclick="adjustImageQuality()">
+                                            <i class="fas fa-sliders-h me-1"></i>Qualité
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Informations de scan -->
+                            <div class="card mt-3">
+                                <div class="card-header">
+                                    <h6><i class="fas fa-info-circle me-2"></i>Informations de Scan</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <small class="text-muted">Résolution:</small>
+                                            <div id="scanResolution" class="fw-bold">150 DPI</div>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Format:</small>
+                                            <div id="scanFormatInfo" class="fw-bold">JPEG</div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-6">
+                                            <small class="text-muted">Taille:</small>
+                                            <div id="scanSize" class="fw-bold">2.3 MB</div>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Dimensions:</small>
+                                            <div id="scanDimensions" class="fw-bold">2480x3508 px</div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-12">
+                                            <small class="text-muted">Qualité:</small>
+                                            <div class="progress" style="height: 6px;">
+                                                <div class="progress-bar bg-success" id="qualityBar" style="width: 85%"></div>
+                                            </div>
+                                            <small class="text-muted" id="qualityText">85% - Excellente</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Formulaire de détails -->
+                        <div class="col-md-7">
+                            <form id="scannerDetailsForm" class="needs-validation" novalidate>
+                                <div class="mb-3">
+                                    <label for="scannerTitle" class="form-label fw-bold">Titre du Document *</label>
+                                    <input type="text" class="form-control" id="scannerTitle" required 
+                                           placeholder="Titre du document médical">
+                                    <div class="invalid-feedback">Le titre est requis</div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="scannerType" class="form-label fw-bold">Type de Document *</label>
+                                        <select class="form-select" id="scannerType" required onchange="updateDocumentType()">
+                                            <option value="">Sélectionner le type</option>
+                                            <option value="medical_record">📋 Dossier Médical</option>
+                                            <option value="prescription">💊 Ordonnance</option>
+                                            <option value="lab_results">🧪 Résultats Laboratoire</option>
+                                            <option value="xray">📸 Radiographie</option>
+                                            <option value="consultation">👨‍⚕️ Consultation</option>
+                                            <option value="certificate">📜 Certificat Médical</option>
+                                            <option value="insurance">🏥 Assurance</option>
+                                            <option value="other">📄 Autre</option>
+                                        </select>
+                                        <div class="invalid-feedback">Le type est requis</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="scannerPatient" class="form-label fw-bold">Patient *</label>
+                                        <select class="form-select" id="scannerPatient" required>
+                                            <option value="">Sélectionner un patient</option>
+                                        </select>
+                                        <div class="invalid-feedback">Le patient est requis</div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="scannerDate" class="form-label fw-bold">Date du Document *</label>
+                                        <input type="date" class="form-control" id="scannerDate" required>
+                                        <div class="invalid-feedback">La date est requise</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="scannerPriority" class="form-label fw-bold">Priorité</label>
+                                        <select class="form-select" id="scannerPriority">
+                                            <option value="low">🔵 Faible</option>
+                                            <option value="medium" selected>🟡 Moyenne</option>
+                                            <option value="high">🟠 Élevée</option>
+                                            <option value="urgent">🔴 Urgente</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="scannerDescription" class="form-label fw-bold">Description</label>
+                                    <textarea class="form-control" id="scannerDescription" rows="3"
+                                              placeholder="Description du document..."></textarea>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="scannerDepartment" class="form-label fw-bold">Département</label>
+                                        <select class="form-select" id="scannerDepartment">
+                                            <option value="">Sélectionner</option>
+                                            <option value="cardiology">❤️ Cardiologie</option>
+                                            <option value="neurology">🧠 Neurologie</option>
+                                            <option value="orthopedics">🦴 Orthopédie</option>
+                                            <option value="pediatrics">👶 Pédiatrie</option>
+                                            <option value="emergency">🚨 Urgences</option>
+                                            <option value="surgery">⚕️ Chirurgie</option>
+                                            <option value="radiology">📸 Radiologie</option>
+                                            <option value="general">🏥 Médecine Générale</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="scannerDoctor" class="form-label fw-bold">Médecin</label>
+                                        <select class="form-select" id="scannerDoctor">
+                                            <option value="">Sélectionner</option>
+                                            <option value="dr_benali">Dr. Benali</option>
+                                            <option value="dr_alaoui">Dr. Alaoui</option>
+                                            <option value="dr_el_fassi">Dr. El Fassi</option>
+                                            <option value="dr_benkirane">Dr. Benkirane</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="scannerTags" class="form-label fw-bold">Mots-clés</label>
+                                    <input type="text" class="form-control" id="scannerTags" 
+                                           placeholder="Séparés par des virgules (ex: consultation, suivi, traitement)">
+                                    <small class="text-muted">L'IA peut suggérer des mots-clés automatiquement</small>
+                                </div>
+
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="autoProcessOCR" checked>
+                                    <label class="form-check-label" for="autoProcessOCR">
+                                        <i class="fas fa-robot me-2"></i>
+                                        <strong>OCR automatique</strong>
+                                        <small class="d-block text-muted">
+                                            Extraction automatique du texte avec reconnaissance
+                                        </small>
+                                    </label>
+                                </div>
+
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="autoClassify" checked>
+                                    <label class="form-check-label" for="autoClassify">
+                                        <i class="fas fa-brain me-2"></i>
+                                        <strong>Classification automatique IA</strong>
+                                        <small class="d-block text-muted">
+                                            L'IA analysera le contenu pour suggérer le type et les métadonnées
+                                        </small>
+                                    </label>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Annuler
+                    </button>
+                    <button type="button" class="btn btn-warning me-2" onclick="processWithAI()">
+                        <i class="fas fa-robot me-2"></i>Analyser avec IA
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="saveScannedDocument()">
+                        <i class="fas fa-save me-2"></i>Sauvegarder Document
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Upload Document -->
+    <div class="modal fade" id="uploadDocumentModal" tabindex="-1" aria-labelledby="uploadDocumentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-gradient-primary text-white">
+                    <h5 class="modal-title" id="uploadDocumentModalLabel">
+                        <i class="fas fa-upload me-2"></i>Importer Document Médical
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Zone d'Upload -->
+                        <div class="col-md-6">
+                            <div class="upload-zone" id="uploadZone">
+                                <div class="upload-placeholder">
+                                    <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                                    <h5>Glissez-déposez vos fichiers ici</h5>
+                                    <p class="text-muted">ou cliquez pour sélectionner</p>
+                                    <input type="file" id="documentFileInput" class="d-none" multiple 
+                                           accept="image/*,application/pdf,.doc,.docx">
+                                    <button class="btn btn-primary" onclick="document.getElementById('documentFileInput').click()">
+                                        <i class="fas fa-file-medical me-2"></i>Sélectionner Fichiers
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="uploadedFiles" class="uploaded-files mt-3">
+                                <!-- Fichiers uploadés apparaîtront ici -->
+                            </div>
+                        </div>
+
+                        <!-- Formulaire de Métadonnées -->
+                        <div class="col-md-6">
+                            <form id="documentMetadataForm" class="needs-validation" novalidate>
+                                <div class="mb-3">
+                                    <label for="documentTitle" class="form-label fw-bold">Titre du Document *</label>
+                                    <input type="text" class="form-control" id="documentTitle" required>
+                                    <div class="invalid-feedback">Le titre est requis</div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="documentType" class="form-label fw-bold">Type *</label>
+                                        <select class="form-select" id="documentType" required>
+                                            <option value="">Sélectionner</option>
+                                            <option value="medical_record">📋 Dossier Médical</option>
+                                            <option value="prescription">💊 Ordonnance</option>
+                                            <option value="lab_results">🧪 Résultats Labo</option>
+                                            <option value="xray">📸 Radiographie</option>
+                                            <option value="consultation">👨‍⚕️ Consultation</option>
+                                            <option value="certificate">📜 Certificat</option>
+                                            <option value="other">📄 Autre</option>
+                                        </select>
+                                        <div class="invalid-feedback">Le type est requis</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="documentPatient" class="form-label fw-bold">Patient *</label>
+                                        <select class="form-select" id="documentPatient" required>
+                                            <option value="">Sélectionner patient</option>
+                                        </select>
+                                        <div class="invalid-feedback">Le patient est requis</div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="documentDate" class="form-label fw-bold">Date *</label>
+                                        <input type="date" class="form-control" id="documentDate" required>
+                                        <div class="invalid-feedback">La date est requise</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="documentPriority" class="form-label fw-bold">Priorité</label>
+                                        <select class="form-select" id="documentPriority">
+                                            <option value="low">Faible</option>
+                                            <option value="medium" selected>Moyenne</option>
+                                            <option value="high">Élevée</option>
+                                            <option value="urgent">Urgente</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="documentDescription" class="form-label fw-bold">Description</label>
+                                    <textarea class="form-control" id="documentDescription" rows="3"
+                                              placeholder="Description du document..."></textarea>
+                                </div>
+
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="autoProcessAI" checked>
+                                    <label class="form-check-label" for="autoProcessAI">
+                                        <i class="fas fa-robot me-2"></i>Traitement automatique IA
+                                    </label>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Annuler
+                    </button>
+                    <button type="button" class="btn btn-warning me-2" onclick="processDocumentWithAI()">
+                        <i class="fas fa-robot me-2"></i>Traiter avec IA
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveUploadedDocument()">
+                        <i class="fas fa-save me-2"></i>Sauvegarder Document
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="toast" class="toast" role="alert">
+            <div class="toast-header">
+                <i class="fas fa-info-circle text-primary me-2"></i>
+                <strong class="me-auto">Notification</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="toastBody">
+                <!-- Message de notification -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Nouvel Utilisateur -->
+    <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="addUserModalLabel">
+                        <i class="fas fa-user-plus me-2"></i>Nouvel Utilisateur
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addUserForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="userFirstName" class="form-label fw-bold">
+                                        <i class="fas fa-user me-2"></i>Prénom
+                                    </label>
+                                    <input type="text" class="form-control" id="userFirstName" 
+                                           placeholder="Prénom de l'utilisateur" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="userLastName" class="form-label fw-bold">
+                                        <i class="fas fa-user me-2"></i>Nom
+                                    </label>
+                                    <input type="text" class="form-control" id="userLastName" 
+                                           placeholder="Nom de famille" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="userEmail" class="form-label fw-bold">
+                                        <i class="fas fa-envelope me-2"></i>Email
+                                    </label>
+                                    <input type="email" class="form-control" id="userEmail" 
+                                           placeholder="email@elghassani.ma" required>
+                                    <small class="text-muted">L'email sera utilisé pour la connexion</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="userPhone" class="form-label fw-bold">
+                                        <i class="fas fa-phone me-2"></i>Téléphone
+                                    </label>
+                                    <input type="tel" class="form-control" id="userPhone" 
+                                           placeholder="+212 6XX XXX XXX">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="userRole" class="form-label fw-bold">
+                                        <i class="fas fa-user-tag me-2"></i>Rôle
+                                    </label>
+                                    <select class="form-select" id="userRole" required>
+                                        <option value="">Sélectionner un rôle</option>
+                                        <option value="admin">👨‍💼 Administrateur</option>
+                                        <option value="doctor">👨‍⚕️ Médecin</option>
+                                        <option value="nurse">👩‍⚕️ Infirmière</option>
+                                        <option value="technician">🔧 Technicien</option>
+                                    </select>
+                                    <small class="text-muted">Le rôle détermine les permissions</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="userDepartment" class="form-label fw-bold">
+                                        <i class="fas fa-building me-2"></i>Département
+                                    </label>
+                                    <select class="form-select" id="userDepartment">
+                                        <option value="">Sélectionner un département</option>
+                                        <option value="cardiology">Cardiologie</option>
+                                        <option value="neurology">Neurologie</option>
+                                        <option value="orthopedics">Orthopédie</option>
+                                        <option value="pediatrics">Pédiatrie</option>
+                                        <option value="emergency">Urgences</option>
+                                        <option value="surgery">Chirurgie</option>
+                                        <option value="radiology">Radiologie</option>
+                                        <option value="laboratory">Laboratoire</option>
+                                        <option value="administration">Administration</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="userPassword" class="form-label fw-bold">
+                                        <i class="fas fa-lock me-2"></i>Mot de passe
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control" id="userPassword" 
+                                               placeholder="Mot de passe temporaire" required>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="toggleUserPassword()">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">L'utilisateur devra changer ce mot de passe à la première connexion</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="userConfirmPassword" class="form-label fw-bold">
+                                        <i class="fas fa-lock me-2"></i>Confirmer le mot de passe
+                                    </label>
+                                    <input type="password" class="form-control" id="userConfirmPassword" 
+                                           placeholder="Confirmer le mot de passe" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="userEmployeeId" class="form-label fw-bold">
+                                        <i class="fas fa-id-badge me-2"></i>ID Employé
+                                    </label>
+                                    <input type="text" class="form-control" id="userEmployeeId" 
+                                           placeholder="Ex: EMP001">
+                                    <small class="text-muted">Identifiant unique de l'employé</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="userHireDate" class="form-label fw-bold">
+                                        <i class="fas fa-calendar me-2"></i>Date d'embauche
+                                    </label>
+                                    <input type="date" class="form-control" id="userHireDate">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-shield-alt me-2"></i>Permissions
+                            </label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="permDashboard" checked>
+                                        <label class="form-check-label" for="permDashboard">
+                                            Dashboard
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="permPatients">
+                                        <label class="form-check-label" for="permPatients">
+                                            Gestion Patients
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="permDocuments">
+                                        <label class="form-check-label" for="permDocuments">
+                                            Gestion Documents
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="permReports">
+                                        <label class="form-check-label" for="permReports">
+                                            Rapports
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="permScanner">
+                                        <label class="form-check-label" for="permScanner">
+                                            Scanner
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="permUsers">
+                                        <label class="form-check-label" for="permUsers">
+                                            Gestion Utilisateurs
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="userNotes" class="form-label fw-bold">
+                                <i class="fas fa-sticky-note me-2"></i>Notes
+                            </label>
+                            <textarea class="form-control" id="userNotes" rows="3" 
+                                      placeholder="Notes supplémentaires sur l'utilisateur..."></textarea>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Information :</strong> L'utilisateur recevra un email avec ses informations de connexion et devra changer son mot de passe à la première connexion.
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Annuler
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="saveNewUser()">
+                        <i class="fas fa-save me-2"></i>Créer l'utilisateur
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="js/export-utils.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/patients.js"></script>
+    <script src="js/documents.js"></script>
+    <script src="js/scanner.js"></script>
+    <script src="js/reports.js"></script>
+    <script src="js/users.js"></script>
+    <script src="js/settings.js"></script>
+</body>
+</html>

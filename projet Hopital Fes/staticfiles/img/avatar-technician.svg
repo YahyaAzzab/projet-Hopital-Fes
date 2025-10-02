@@ -1,0 +1,44 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fond circulaire -->
+  <circle cx="60" cy="60" r="60" fill="#FFF3E0"/>
+  
+  <!-- Corps du technicien -->
+  <circle cx="60" cy="75" r="25" fill="#FF9800"/>
+  
+  <!-- Tête -->
+  <circle cx="60" cy="45" r="20" fill="#FFDBAC"/>
+  
+  <!-- Chemise de travail -->
+  <path d="M45 75 L45 90 L75 90 L75 75 L70 70 L50 70 Z" fill="#FFB74D"/>
+  
+  <!-- Col de la chemise -->
+  <path d="M50 70 L50 65 L70 65 L70 70" fill="#FFB74D"/>
+  
+  <!-- Casque de sécurité -->
+  <path d="M40 35 L80 35 Q85 40 85 45 Q85 50 80 50 L40 50 Q35 50 35 45 Q35 40 40 35" fill="#FFC107"/>
+  <path d="M40 40 L80 40 L80 45 L40 45 Z" fill="#FFA000"/>
+  
+  <!-- Visière du casque -->
+  <path d="M45 40 L75 40 Q77 42 75 44 L45 44 Q43 42 45 40" fill="#FFD54F"/>
+  
+  <!-- Yeux -->
+  <circle cx="55" cy="42" r="2" fill="#37474F"/>
+  <circle cx="65" cy="42" r="2" fill="#37474F"/>
+  
+  <!-- Sourire -->
+  <path d="M55 48 Q60 52 65 48" stroke="#37474F" stroke-width="1.5" fill="none"/>
+  
+  <!-- Cheveux -->
+  <path d="M45 35 Q60 25 75 35 Q70 30 60 30 Q50 30 45 35" fill="#4E342E"/>
+  
+  <!-- Outils -->
+  <rect x="35" y="85" width="8" height="3" rx="1" fill="#616161"/>
+  <rect x="77" y="85" width="8" height="3" rx="1" fill="#616161"/>
+  
+  <!-- Badge technique -->
+  <rect x="55" y="78" width="10" height="8" rx="1" fill="white"/>
+  <text x="60" y="83" text-anchor="middle" font-size="3" fill="#FF9800">IT</text>
+  
+  <!-- Bordure -->
+  <circle cx="60" cy="60" r="58" stroke="#FFCC80" stroke-width="4" fill="none"/>
+</svg>

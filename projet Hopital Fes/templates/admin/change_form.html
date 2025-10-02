@@ -1,0 +1,201 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static admin_urls %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .admin-form-page {
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        margin: 20px;
+    }
+    
+    .form-header {
+        background: var(--gradient-medical);
+        color: white;
+        padding: 30px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .form-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="medical-pattern" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/><path d="M50 30v40M30 50h40" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23medical-pattern)"/></svg>');
+        opacity: 0.3;
+    }
+    
+    .form-header h1 {
+        margin: 0;
+        font-size: 32px;
+        font-weight: 700;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .form-container {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid #e2e8f0;
+    }
+    
+    .form-row {
+        margin-bottom: 25px;
+    }
+    
+    .form-row label {
+        color: var(--medical-blue);
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: block;
+        font-size: 14px;
+    }
+    
+    .form-row input, .form-row select, .form-row textarea {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .form-row input:focus, .form-row select:focus, .form-row textarea:focus {
+        outline: none;
+        border-color: var(--medical-blue);
+        box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    }
+    
+    .form-row .help {
+        color: #64748b;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+    
+    .form-actions {
+        background: #f8fafc;
+        padding: 25px;
+        border-radius: 15px;
+        margin-top: 30px;
+        text-align: center;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .btn-save {
+        background: var(--gradient-success);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-md);
+        margin-right: 15px;
+    }
+    
+    .btn-save:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .btn-cancel {
+        background: #64748b;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-cancel:hover {
+        background: #475569;
+        transform: translateY(-3px);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .errorlist {
+        color: var(--danger-color);
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 10px;
+        padding: 10px 15px;
+        margin: 10px 0;
+        list-style: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-form-page">
+    <div class="form-header">
+        <h1>
+            {% if add %}
+                Ajouter {{ opts.verbose_name }}
+            {% else %}
+                Modifier {{ original|truncatewords:"18" }}
+            {% endif %}
+        </h1>
+    </div>
+    
+    <div class="form-container">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="errorlist">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+            
+            {% for field in form %}
+                <div class="form-row">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                        {% if field.field.required %}<span style="color: red;">*</span>{% endif %}
+                    </label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <div class="help">{{ field.help_text }}</div>
+                    {% endif %}
+                    {% if field.errors %}
+                        <div class="errorlist">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-save">
+                    <i class="fas fa-save me-2"></i>
+                    {% if add %}Créer{% else %}Sauvegarder{% endif %}
+                </button>
+                <a href="{% url opts|admin_urlname:'changelist' %}" class="btn-cancel">
+                    <i class="fas fa-times me-2"></i>
+                    Annuler
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

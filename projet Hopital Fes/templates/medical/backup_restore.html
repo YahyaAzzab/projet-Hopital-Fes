@@ -1,0 +1,429 @@
+{% extends 'medical/base.html' %}
+{% load static %}
+
+{% block title %}Sauvegarde & Restauration - Hôpital EL GHASSANI{% endblock %}
+
+{% block extra_css %}
+<style>
+.backup-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    margin-bottom: 1rem;
+}
+
+.backup-card:hover {
+    transform: translateY(-5px);
+}
+
+.backup-item {
+    border: 1px solid #e3e6f0;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: #fff;
+    transition: all 0.3s ease;
+}
+
+.backup-item:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-color: #4e73df;
+}
+
+.backup-info {
+    flex: 1;
+}
+
+.backup-filename {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+}
+
+.backup-meta {
+    font-size: 0.875rem;
+    color: #718096;
+    margin-bottom: 0.5rem;
+}
+
+.backup-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.status-badge {
+    font-size: 0.75rem;
+}
+
+.type-badge {
+    font-size: 0.75rem;
+}
+
+.stats-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+}
+
+.progress-bar-custom {
+    height: 8px;
+    border-radius: 4px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-database me-2"></i>Sauvegarde & Restauration
+        </h1>
+        <div class="d-flex gap-2">
+            <button class="btn btn-success" onclick="createBackup()">
+                <i class="fas fa-plus me-1"></i>Nouvelle Sauvegarde
+            </button>
+            <button class="btn btn-outline-primary" onclick="refreshBackups()">
+                <i class="fas fa-sync-alt me-1"></i>Actualiser
+            </button>
+        </div>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stats-card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-database fa-2x mb-2"></i>
+                    <h4>{{ total_backups }}</h4>
+                    <p class="mb-0">Sauvegardes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-hdd fa-2x mb-2"></i>
+                    <h4>{{ total_size }}</h4>
+                    <p class="mb-0">Taille Totale</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-clock fa-2x mb-2"></i>
+                    <h4>24h</h4>
+                    <p class="mb-0">Dernière Backup</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-shield-alt fa-2x mb-2"></i>
+                    <h4>100%</h4>
+                    <p class="mb-0">Intégrité</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuration de sauvegarde -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card backup-card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-cog me-2"></i>Configuration Automatique
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Fréquence de sauvegarde</label>
+                        <select class="form-select" id="backupFrequency">
+                            <option value="hourly">Horaire</option>
+                            <option value="daily" selected>Quotidien</option>
+                            <option value="weekly">Hebdomadaire</option>
+                            <option value="monthly">Mensuel</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Heure de sauvegarde</label>
+                        <input type="time" class="form-control" value="02:00" id="backupTime">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Rétention (jours)</label>
+                        <input type="number" class="form-control" value="30" min="1" max="365" id="retentionDays">
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="autoBackup" checked>
+                        <label class="form-check-label" for="autoBackup">
+                            Sauvegarde automatique activée
+                        </label>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-primary" onclick="saveBackupConfig()">
+                            <i class="fas fa-save me-1"></i>Sauvegarder la Configuration
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card backup-card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-upload me-2"></i>Actions Rapides
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-success" onclick="createBackup()">
+                            <i class="fas fa-plus me-2"></i>Créer Sauvegarde Maintenant
+                        </button>
+                        <button class="btn btn-info" onclick="verifyBackups()">
+                            <i class="fas fa-check-circle me-2"></i>Vérifier Intégrité
+                        </button>
+                        <button class="btn btn-warning" onclick="cleanOldBackups()">
+                            <i class="fas fa-broom me-2"></i>Nettoyer Anciennes Backups
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportBackupList()">
+                            <i class="fas fa-download me-2"></i>Exporter Liste
+                        </button>
+                    </div>
+                    <hr>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Conseil :</strong> Les sauvegardes automatiques sont planifiées pendant les heures creuses pour minimiser l'impact sur les performances.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des sauvegardes -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Historique des Sauvegardes
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% for backup in backups %}
+                    <div class="backup-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="backup-info">
+                                <div class="backup-filename">
+                                    <i class="fas fa-file-archive me-2"></i>{{ backup.filename }}
+                                </div>
+                                <div class="backup-meta">
+                                    <span class="me-3">
+                                        <i class="fas fa-calendar me-1"></i>{{ backup.created_at }}
+                                    </span>
+                                    <span class="me-3">
+                                        <i class="fas fa-weight me-1"></i>{{ backup.size }}
+                                    </span>
+                                    <span class="type-badge badge bg-{% if backup.type == 'Automatique' %}primary{% else %}secondary{% endif %}">
+                                        {{ backup.type }}
+                                    </span>
+                                    <span class="status-badge badge bg-success ms-2">
+                                        {{ backup.status }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="backup-actions">
+                                <button class="btn btn-sm btn-outline-primary" onclick="downloadBackup({{ backup.id }})">
+                                    <i class="fas fa-download"></i> Télécharger
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="restoreBackup({{ backup.id }})">
+                                    <i class="fas fa-undo"></i> Restaurer
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning" onclick="verifyBackup({{ backup.id }})">
+                                    <i class="fas fa-check"></i> Vérifier
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteBackup({{ backup.id }})">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <!-- Pagination -->
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <div class="text-muted">
+                            Affichage de {{ backups|length }} sauvegardes
+                        </div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1">Précédent</a>
+                                </li>
+                                <li class="page-item active">
+                                    <a class="page-link" href="#">1</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">2</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">Suivant</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Créer une nouvelle sauvegarde
+function createBackup() {
+    if (confirm('Créer une nouvelle sauvegarde maintenant ? Cette opération peut prendre quelques minutes.')) {
+        // Afficher un indicateur de progression
+        const progressModal = `
+            <div class="modal fade" id="backupProgressModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="fas fa-database me-2"></i>Création de Sauvegarde
+                            </h5>
+                        </div>
+                        <div class="modal-body">
+                            <div class="text-center mb-3">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Chargement...</span>
+                                </div>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <div class="text-center mt-2">
+                                <small class="text-muted">Préparation de la sauvegarde...</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', progressModal);
+        const modal = new bootstrap.Modal(document.getElementById('backupProgressModal'));
+        modal.show();
+        
+        // Simuler la progression
+        simulateBackupProgress();
+    }
+}
+
+// Simuler la progression de sauvegarde
+function simulateBackupProgress() {
+    const progressBar = document.querySelector('.progress-bar');
+    const progressText = document.querySelector('.text-muted');
+    let progress = 0;
+    
+    const interval = setInterval(() => {
+        progress += Math.random() * 15;
+        if (progress > 100) progress = 100;
+        
+        progressBar.style.width = progress + '%';
+        
+        if (progress < 30) {
+            progressText.textContent = 'Exportation des données...';
+        } else if (progress < 60) {
+            progressText.textContent = 'Compression des fichiers...';
+        } else if (progress < 90) {
+            progressText.textContent = 'Vérification de l\'intégrité...';
+        } else {
+            progressText.textContent = 'Finalisation...';
+        }
+        
+        if (progress >= 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+                bootstrap.Modal.getInstance(document.getElementById('backupProgressModal')).hide();
+                document.getElementById('backupProgressModal').remove();
+                alert('Sauvegarde créée avec succès !');
+                location.reload();
+            }, 1000);
+        }
+    }, 500);
+}
+
+// Sauvegarder la configuration
+function saveBackupConfig() {
+    const frequency = document.getElementById('backupFrequency').value;
+    const time = document.getElementById('backupTime').value;
+    const retention = document.getElementById('retentionDays').value;
+    const autoBackup = document.getElementById('autoBackup').checked;
+    
+    alert(`Configuration sauvegardée !\nFréquence: ${frequency}\nHeure: ${time}\nRétention: ${retention} jours\nAuto: ${autoBackup ? 'Activé' : 'Désactivé'}`);
+}
+
+// Actualiser les sauvegardes
+function refreshBackups() {
+    location.reload();
+}
+
+// Télécharger une sauvegarde
+function downloadBackup(backupId) {
+    alert(`Téléchargement de la sauvegarde ${backupId}...`);
+    // Ici on ferait l'appel API pour télécharger
+}
+
+// Restaurer une sauvegarde
+function restoreBackup(backupId) {
+    if (confirm('ATTENTION: Restaurer cette sauvegarde va remplacer toutes les données actuelles. Êtes-vous sûr de vouloir continuer ?')) {
+        if (confirm('Dernière chance ! Cette action est IRRÉVERSIBLE. Continuer ?')) {
+            alert(`Restauration de la sauvegarde ${backupId} en cours...`);
+            // Ici on ferait l'appel API pour restaurer
+        }
+    }
+}
+
+// Vérifier une sauvegarde
+function verifyBackup(backupId) {
+    alert(`Vérification de l'intégrité de la sauvegarde ${backupId}...`);
+    // Ici on ferait l'appel API pour vérifier
+}
+
+// Supprimer une sauvegarde
+function deleteBackup(backupId) {
+    if (confirm('Supprimer définitivement cette sauvegarde ?')) {
+        alert(`Sauvegarde ${backupId} supprimée.`);
+        // Ici on ferait l'appel API pour supprimer
+    }
+}
+
+// Vérifier toutes les sauvegardes
+function verifyBackups() {
+    alert('Vérification de l\'intégrité de toutes les sauvegardes...');
+}
+
+// Nettoyer les anciennes sauvegardes
+function cleanOldBackups() {
+    if (confirm('Supprimer les sauvegardes plus anciennes que la période de rétention configurée ?')) {
+        alert('Nettoyage des anciennes sauvegardes...');
+    }
+}
+
+// Exporter la liste des sauvegardes
+function exportBackupList() {
+    alert('Export de la liste des sauvegardes...');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,176 @@
+{% extends 'medical/base.html' %}
+{% load static %}
+
+{% block title %}Nouveau Message - Hôpital EL GHASSANI{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body bg-gradient-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-0">
+                                <i class="fas fa-edit me-2"></i>Nouveau Message
+                            </h4>
+                            <p class="mb-0 opacity-75">Envoyer un message à un collègue</p>
+                        </div>
+                        <a href="{% url 'messages' %}" class="btn btn-light">
+                            <i class="fas fa-arrow-left me-2"></i>Retour aux messages
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulaire -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="recipient" class="form-label fw-bold">
+                                    <i class="fas fa-user me-1"></i>Destinataire *
+                                </label>
+                                <select class="form-select" id="recipient" name="recipient" required>
+                                    <option value="">Sélectionner un destinataire</option>
+                                    {% for user in users %}
+                                    <option value="{{ user.id }}">
+                                        {{ user.get_full_name }} ({{ user.get_role_display }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="priority" class="form-label fw-bold">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>Priorité
+                                </label>
+                                <select class="form-select" id="priority" name="priority">
+                                    <option value="normal">Normal</option>
+                                    <option value="high">Élevé</option>
+                                    <option value="urgent">Urgent</option>
+                                    <option value="low">Faible</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="category" class="form-label fw-bold">
+                                <i class="fas fa-tags me-1"></i>Catégorie
+                            </label>
+                            <select class="form-select" id="category" name="category">
+                                <option value="general">Général</option>
+                                <option value="medical">Médical</option>
+                                <option value="technical">Technique</option>
+                                <option value="urgent">Urgent</option>
+                                <option value="suggestion">Suggestion</option>
+                                <option value="complaint">Plainte</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="title" class="form-label fw-bold">
+                                <i class="fas fa-heading me-1"></i>Titre *
+                            </label>
+                            <input type="text" class="form-control" id="title" name="title" required
+                                   placeholder="Sujet du message">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="content" class="form-label fw-bold">
+                                <i class="fas fa-comment me-1"></i>Contenu *
+                            </label>
+                            <textarea class="form-control" id="content" name="content" rows="8" required
+                                      placeholder="Tapez votre message ici..."></textarea>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'messages' %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i>Envoyer le message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aide -->
+    <div class="row justify-content-center mt-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Conseils pour un bon message
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>Soyez clair et concis</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Utilisez un titre descriptif</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Choisissez la bonne priorité</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>Respectez vos collègues</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Utilisez la bonne catégorie</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Relisez avant d'envoyer</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-resize textarea
+document.getElementById('content').addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = (this.scrollHeight) + 'px';
+});
+
+// Validation en temps réel
+document.querySelector('form').addEventListener('submit', function(e) {
+    const recipient = document.getElementById('recipient').value;
+    const title = document.getElementById('title').value.trim();
+    const content = document.getElementById('content').value.trim();
+    
+    if (!recipient || !title || !content) {
+        e.preventDefault();
+        alert('Veuillez remplir tous les champs obligatoires.');
+        return false;
+    }
+    
+    if (title.length < 5) {
+        e.preventDefault();
+        alert('Le titre doit contenir au moins 5 caractères.');
+        return false;
+    }
+    
+    if (content.length < 10) {
+        e.preventDefault();
+        alert('Le contenu doit contenir au moins 10 caractères.');
+        return false;
+    }
+});
+</script>
+{% endblock %}

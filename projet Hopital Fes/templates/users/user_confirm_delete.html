@@ -1,0 +1,182 @@
+{% extends 'medical/base.html' %}
+{% load static %}
+
+{% block title %}Supprimer Utilisateur - {{ user.get_full_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .danger-card {
+        border-left: 4px solid #dc3545;
+        background: #fff5f5;
+    }
+    .user-info-card {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        border: 1px solid #dee2e6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-exclamation-triangle me-2 text-danger"></i>Confirmer la suppression
+        </h1>
+        <a href="{% url 'view_user' user.id %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Retour aux détails
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xl-8">
+            <div class="card shadow">
+                <div class="card-header py-3 danger-card">
+                    <h6 class="m-0 font-weight-bold text-danger">
+                        <i class="fas fa-trash-alt me-2"></i>Suppression d'utilisateur
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <!-- Avertissement -->
+                    <div class="alert alert-danger" role="alert">
+                        <h4 class="alert-heading">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Attention !
+                        </h4>
+                        <p>Vous êtes sur le point de supprimer définitivement cet utilisateur. Cette action est <strong>irréversible</strong>.</p>
+                        <hr>
+                        <p class="mb-0">
+                            <strong>Conséquences :</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Toutes les données associées à cet utilisateur seront supprimées</li>
+                                <li>L'utilisateur ne pourra plus se connecter au système</li>
+                                <li>Les rapports créés par cet utilisateur seront conservés mais sans référence</li>
+                            </ul>
+                        </p>
+                    </div>
+
+                    <!-- Informations de l'utilisateur -->
+                    <div class="user-info-card mb-4">
+                        <h5 class="mb-3">
+                            <i class="fas fa-user me-2"></i>Informations de l'utilisateur à supprimer
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="fw-bold text-muted">Nom complet</label>
+                                    <p class="mb-0">{{ user.get_full_name|default:"Non défini" }}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="fw-bold text-muted">Nom d'utilisateur</label>
+                                    <p class="mb-0"><code>{{ user.username }}</code></p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="fw-bold text-muted">Email</label>
+                                    <p class="mb-0">
+                                        {% if user.email %}
+                                            <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+                                        {% else %}
+                                            <span class="text-muted">Non défini</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="fw-bold text-muted">Rôle</label>
+                                    <p class="mb-0">
+                                        <span class="badge bg-primary">{{ user.get_role_display }}</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="fw-bold text-muted">Statut</label>
+                                    <p class="mb-0">
+                                        <span class="badge {% if user.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                            {% if user.is_active %}Actif{% else %}Inactif{% endif %}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="fw-bold text-muted">Date d'inscription</label>
+                                    <p class="mb-0">{{ user.date_joined|date:"d/m/Y à H:i" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formulaire de confirmation -->
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="form-group mb-4">
+                            <label for="confirm_username" class="form-label">
+                                <strong>Pour confirmer la suppression, tapez le nom d'utilisateur :</strong>
+                            </label>
+                            <input type="text" class="form-control" id="confirm_username" 
+                                   placeholder="Tapez '{{ user.username }}' pour confirmer" 
+                                   required>
+                            <small class="text-muted">Tapez exactement : <code>{{ user.username }}</code></small>
+                        </div>
+
+                        <!-- Boutons d'action -->
+                        <div class="d-flex justify-content-end">
+                            <a href="{% url 'view_user' user.id %}" class="btn btn-secondary me-3">
+                                <i class="fas fa-times"></i> Annuler
+                            </a>
+                            <button type="submit" class="btn btn-danger" id="deleteButton" disabled>
+                                <i class="fas fa-trash-alt"></i> Supprimer définitivement
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Enable delete button only when username is correctly typed
+document.getElementById('confirm_username').addEventListener('input', function() {
+    const confirmInput = this.value;
+    const correctUsername = '{{ user.username }}';
+    const deleteButton = document.getElementById('deleteButton');
+    
+    if (confirmInput === correctUsername) {
+        deleteButton.disabled = false;
+        deleteButton.classList.remove('btn-danger');
+        deleteButton.classList.add('btn-danger');
+    } else {
+        deleteButton.disabled = true;
+    }
+});
+
+// Double confirmation before submission
+document.querySelector('form').addEventListener('submit', function(e) {
+    const confirmInput = document.getElementById('confirm_username').value;
+    const correctUsername = '{{ user.username }}';
+    
+    if (confirmInput !== correctUsername) {
+        e.preventDefault();
+        alert('Le nom d\'utilisateur ne correspond pas. Veuillez le saisir correctement.');
+        return false;
+    }
+    
+    const finalConfirm = confirm('Êtes-vous ABSOLUMENT sûr de vouloir supprimer cet utilisateur ?\n\nCette action est IRRÉVERSIBLE !');
+    if (!finalConfirm) {
+        e.preventDefault();
+        return false;
+    }
+});
+</script>
+{% endblock %}
+

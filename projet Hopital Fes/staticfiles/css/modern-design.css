@@ -1,0 +1,425 @@
+/* Design moderne pour la plateforme médicale */
+
+/* Variables CSS pour la cohérence */
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+    --border-radius: 15px;
+    --border-radius-lg: 20px;
+    
+    --text-primary: #2c3e50;
+    --text-secondary: #7f8c8d;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Thème sombre */
+.dark-theme {
+    --text-primary: #ecf0f1;
+    --text-secondary: #bdc3c7;
+    --bg-primary: #2c3e50;
+    --bg-secondary: #34495e;
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    --card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* Amélioration générale des cartes */
+.card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+    background: var(--bg-primary);
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--card-shadow-hover);
+}
+
+.card-header {
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    padding: 1.5rem;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+/* Amélioration des boutons */
+.btn {
+    border-radius: 25px;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn-primary {
+    background: var(--primary-gradient);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-success {
+    background: var(--success-gradient);
+    box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+}
+
+.btn-warning {
+    background: var(--warning-gradient);
+    box-shadow: 0 5px 15px rgba(240, 147, 251, 0.4);
+}
+
+.btn-danger {
+    background: var(--danger-gradient);
+    box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+}
+
+.btn-info {
+    background: var(--info-gradient);
+    box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+}
+
+/* Amélioration de la navbar */
+.navbar {
+    background: var(--primary-gradient) !important;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    border: none;
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: white !important;
+}
+
+.navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white !important;
+}
+
+/* Amélioration de la sidebar */
+.sidebar {
+    background: var(--bg-primary);
+    box-shadow: var(--card-shadow);
+    border-radius: var(--border-radius-lg);
+    margin: 1rem;
+    padding: 1.5rem 0;
+}
+
+.sidebar .nav-link {
+    color: var(--text-primary);
+    padding: 1rem 2rem;
+    border-radius: 0;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.sidebar .nav-link:hover {
+    background: var(--primary-gradient);
+    color: white;
+    transform: translateX(10px);
+}
+
+.sidebar .nav-link.active {
+    background: var(--primary-gradient);
+    color: white;
+    font-weight: 600;
+}
+
+/* Amélioration des tableaux */
+.table {
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    background: var(--bg-primary);
+}
+
+.table thead {
+    background: var(--primary-gradient);
+    color: white;
+}
+
+.table thead th {
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.table tbody tr:hover {
+    background: rgba(102, 126, 234, 0.05);
+    transform: scale(1.01);
+}
+
+/* Amélioration des badges */
+.badge {
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-success {
+    background: var(--success-gradient);
+}
+
+.badge-warning {
+    background: var(--warning-gradient);
+}
+
+.badge-danger {
+    background: var(--danger-gradient);
+}
+
+.badge-info {
+    background: var(--info-gradient);
+}
+
+/* Amélioration des formulaires */
+.form-control {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 1rem;
+    transition: all 0.3s ease;
+    background: var(--bg-primary);
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    background: white;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+/* Amélioration des modals */
+.modal-content {
+    border-radius: var(--border-radius-lg);
+    border: none;
+    box-shadow: var(--card-shadow-hover);
+    overflow: hidden;
+}
+
+.modal-header {
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    padding: 2rem;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.modal-footer {
+    border: none;
+    padding: 2rem;
+    background: var(--bg-secondary);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+/* Amélioration des statistiques */
+.stat-card {
+    background: var(--primary-gradient);
+    color: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: pulse 3s infinite;
+}
+
+.stat-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: var(--card-shadow-hover);
+}
+
+.stat-number {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+/* Section administrateur */
+.admin-section {
+    background: var(--danger-gradient);
+    color: white;
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    margin: 2rem 0;
+    box-shadow: var(--card-shadow);
+}
+
+.admin-section h2 {
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+}
+
+.admin-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.admin-action-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.admin-action-card:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-5px);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .sidebar {
+        margin: 0.5rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+    }
+}
+
+/* Amélioration des alertes */
+.alert {
+    border-radius: var(--border-radius);
+    border: none;
+    padding: 1.5rem;
+    box-shadow: var(--card-shadow);
+}
+
+.alert-success {
+    background: var(--success-gradient);
+    color: white;
+}
+
+.alert-warning {
+    background: var(--warning-gradient);
+    color: white;
+}
+
+.alert-danger {
+    background: var(--danger-gradient);
+    color: white;
+}
+
+.alert-info {
+    background: var(--info-gradient);
+    color: white;
+}
+

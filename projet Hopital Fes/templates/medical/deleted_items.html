@@ -1,0 +1,348 @@
+{% extends 'medical/base.html' %}
+{% load static %}
+
+{% block title %}Éléments Supprimés - Administration{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/modern-design.css' %}">
+<style>
+    .deleted-header {
+        background: var(--danger-gradient);
+        color: white;
+        padding: 2rem;
+        border-radius: var(--border-radius-lg);
+        margin-bottom: 2rem;
+    }
+    
+    .search-bar {
+        background: var(--bg-primary);
+        border-radius: var(--border-radius);
+        padding: 1rem;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 2rem;
+    }
+    
+    .deleted-item-card {
+        background: var(--bg-primary);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: var(--card-shadow);
+        border-left: 5px solid #ff6b6b;
+        transition: all 0.3s ease;
+    }
+    
+    .deleted-item-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--card-shadow-hover);
+    }
+    
+    .deletion-code {
+        font-family: monospace;
+        background: rgba(255, 107, 107, 0.1);
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        font-weight: 600;
+        color: #e74c3c;
+        border: 2px dashed rgba(255, 107, 107, 0.3);
+    }
+    
+    .deletion-type-badge {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+    
+    .deletion-type-patient {
+        background: var(--info-gradient);
+        color: white;
+    }
+    
+    .deletion-type-document {
+        background: var(--warning-gradient);
+        color: white;
+    }
+    
+    .deletion-type-report {
+        background: var(--success-gradient);
+        color: white;
+    }
+    
+    .deletion-type-user {
+        background: var(--danger-gradient);
+        color: white;
+    }
+    
+    .deletion-type-activity {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .restore-btn {
+        background: var(--success-gradient);
+        border: none;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .restore-btn:hover {
+        transform: scale(1.05);
+        color: white;
+    }
+    
+    .permanent-delete-btn {
+        background: var(--danger-gradient);
+        border: none;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .permanent-delete-btn:hover {
+        transform: scale(1.05);
+        color: white;
+    }
+    
+    .data-preview {
+        background: var(--bg-secondary);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-top: 1rem;
+        font-family: monospace;
+        font-size: 0.9rem;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-secondary);
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .filter-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .filter-tab {
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        background: var(--bg-secondary);
+        border: none;
+        color: var(--text-primary);
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .filter-tab.active {
+        background: var(--primary-gradient);
+        color: white;
+    }
+    
+    .filter-tab:hover {
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="deleted-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-trash-restore me-3"></i>Éléments Supprimés</h1>
+                <p class="mb-0">Gestion et récupération des données supprimées</p>
+            </div>
+            <div>
+                <a href="{% url 'admin_dashboard' %}" class="btn btn-light">
+                    <i class="fas fa-arrow-left me-2"></i>Retour au tableau de bord
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barre de recherche et filtres -->
+    <div class="search-bar">
+        <form method="get" class="row g-3">
+            <div class="col-md-8">
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" class="form-control" name="search" value="{{ search }}" 
+                           placeholder="Rechercher par code, raison ou utilisateur...">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <select name="type" class="form-select">
+                    <option value="">Tous les types</option>
+                    {% for type_code, type_name in deletion_types %}
+                        <option value="{{ type_code }}" {% if item_type == type_code %}selected{% endif %}>
+                            {{ type_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
+
+    <!-- Filtres rapides -->
+    <div class="filter-tabs">
+        <button class="filter-tab {% if not item_type %}active{% endif %}" 
+                onclick="filterByType('')">
+            <i class="fas fa-list me-2"></i>Tous ({{ deleted_items|length }})
+        </button>
+        {% for type_code, type_name in deletion_types %}
+        <button class="filter-tab {% if item_type == type_code %}active{% endif %}" 
+                onclick="filterByType('{{ type_code }}')">
+            <i class="fas fa-{% if type_code == 'patient' %}users{% elif type_code == 'document' %}file{% elif type_code == 'report' %}clipboard{% elif type_code == 'user' %}user-shield{% else %}history{% endif %} me-2"></i>
+            {{ type_name }}
+        </button>
+        {% endfor %}
+    </div>
+
+    <!-- Liste des éléments supprimés -->
+    {% if deleted_items %}
+        {% for item in deleted_items %}
+        <div class="deleted-item-card">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="deletion-type-badge deletion-type-{{ item.deletion_type }}">
+                            <i class="fas fa-{% if item.deletion_type == 'patient' %}users{% elif item.deletion_type == 'document' %}file{% elif item.deletion_type == 'report' %}clipboard{% elif item.deletion_type == 'user' %}user-shield{% else %}history{% endif %} me-2"></i>
+                            {{ item.get_deletion_type_display }}
+                        </span>
+                        <span class="deletion-code ms-3">{{ item.deletion_code }}</span>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1">
+                                <strong>ID Original:</strong> {{ item.original_id }}
+                            </p>
+                            <p class="mb-1">
+                                <strong>Supprimé par:</strong> {{ item.deleted_by.username }}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1">
+                                <strong>Date:</strong> {{ item.deleted_at|date:"d/m/Y à H:i" }}
+                            </p>
+                            <p class="mb-1">
+                                <strong>Récupérable:</strong> 
+                                {% if item.can_restore %}
+                                    <span class="badge bg-success">Oui</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Non</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    {% if item.deletion_reason %}
+                    <div class="mt-2">
+                        <strong>Raison:</strong> {{ item.deletion_reason }}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Aperçu des données -->
+                    <div class="data-preview">
+                        <strong>Aperçu des données:</strong><br>
+                        {% for key, value in item.original_data.items %}
+                            {% if key != 'password' and key != 'secret' %}
+                                <strong>{{ key }}:</strong> {{ value|truncatechars:50 }}<br>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="col-md-4 text-end">
+                    <div class="btn-group-vertical" role="group">
+                        {% if item.can_restore %}
+                        <a href="{% url 'restore_item' item.deletion_code %}" 
+                           class="btn restore-btn mb-2"
+                           onclick="return confirm('Êtes-vous sûr de vouloir restaurer cet élément ?')">
+                            <i class="fas fa-undo me-2"></i>Restaurer
+                        </a>
+                        {% endif %}
+                        
+                        <a href="{% url 'permanent_delete' item.deletion_code %}" 
+                           class="btn permanent-delete-btn"
+                           onclick="return confirm('ATTENTION: Cette action est irréversible. Êtes-vous sûr de vouloir supprimer définitivement cet élément ?')">
+                            <i class="fas fa-trash me-2"></i>Suppression définitive
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-trash"></i>
+            <h3>Aucun élément supprimé trouvé</h3>
+            <p>Il n'y a actuellement aucun élément supprimé correspondant à vos critères.</p>
+            <a href="{% url 'admin_dashboard' %}" class="btn btn-primary">
+                <i class="fas fa-arrow-left me-2"></i>Retour au tableau de bord
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterByType(type) {
+    const url = new URL(window.location);
+    if (type) {
+        url.searchParams.set('type', type);
+    } else {
+        url.searchParams.delete('type');
+    }
+    window.location.href = url.toString();
+}
+
+// Animation des cartes
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.deleted-item-card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('fade-in-up');
+    });
+    
+    // Confirmation avant restauration
+    document.querySelectorAll('.restore-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            if (!confirm('Êtes-vous sûr de vouloir restaurer cet élément ?')) {
+                e.preventDefault();
+            }
+        });
+    });
+    
+    // Confirmation avant suppression définitive
+    document.querySelectorAll('.permanent-delete-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            if (!confirm('ATTENTION: Cette action est irréversible. Êtes-vous sûr de vouloir supprimer définitivement cet élément ?')) {
+                e.preventDefault();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

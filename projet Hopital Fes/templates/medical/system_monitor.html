@@ -1,0 +1,443 @@
+{% extends 'medical/base.html' %}
+{% load static %}
+
+{% block title %}Monitoring Système - Hôpital EL GHASSANI{% endblock %}
+
+{% block extra_css %}
+<style>
+.metric-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    overflow: hidden;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+}
+
+.metric-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.metric-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.progress-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin: 0 auto;
+}
+
+.progress-circle svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.progress-circle .progress-ring {
+    fill: none;
+    stroke-width: 8;
+}
+
+.progress-circle .progress-ring-bg {
+    stroke: #e9ecef;
+}
+
+.progress-circle .progress-ring-fill {
+    stroke: #007bff;
+    stroke-linecap: round;
+    transition: stroke-dasharray 0.5s ease;
+}
+
+.progress-circle .progress-text {
+    position: absolute;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #495057;
+}
+
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.status-online {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-offline {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.alert-card {
+    border-left: 4px solid #dc3545;
+    background: #f8f9fa;
+    border-radius: 0 8px 8px 0;
+}
+
+.alert-card.warning {
+    border-left-color: #ffc107;
+}
+
+.alert-card.info {
+    border-left-color: #17a2b8;
+}
+
+.realtime-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #28a745;
+    font-weight: 500;
+}
+
+.pulse {
+    width: 8px;
+    height: 8px;
+    background: #28a745;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-heartbeat me-2"></i>Monitoring Système
+        </h1>
+        <div class="d-flex gap-2 align-items-center">
+            <div class="realtime-indicator">
+                <div class="pulse"></div>
+                Temps réel
+            </div>
+            <button class="btn btn-outline-primary" onclick="refreshMonitoring()">
+                <i class="fas fa-sync-alt me-1"></i>Actualiser
+            </button>
+        </div>
+    </div>
+
+    <!-- Métriques principales -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card metric-card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-microchip fa-2x mb-3"></i>
+                    <div class="metric-value">{{ system_stats.cpu_usage }}%</div>
+                    <div class="metric-label">Utilisation CPU</div>
+                    <div class="progress mt-3" style="height: 6px;">
+                        <div class="progress-bar bg-white" style="width: {{ system_stats.cpu_usage }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card metric-card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-memory fa-2x mb-3"></i>
+                    <div class="metric-value">{{ system_stats.memory_usage }}%</div>
+                    <div class="metric-label">Mémoire RAM</div>
+                    <div class="progress mt-3" style="height: 6px;">
+                        <div class="progress-bar bg-white" style="width: {{ system_stats.memory_usage }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card metric-card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-hdd fa-2x mb-3"></i>
+                    <div class="metric-value">{{ system_stats.disk_usage }}%</div>
+                    <div class="metric-label">Espace Disque</div>
+                    <div class="progress mt-3" style="height: 6px;">
+                        <div class="progress-bar bg-white" style="width: {{ system_stats.disk_usage }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card metric-card bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-network-wired fa-2x mb-3"></i>
+                    <div class="metric-value">{{ system_stats.network_usage }}%</div>
+                    <div class="metric-label">Réseau</div>
+                    <div class="progress mt-3" style="height: 6px;">
+                        <div class="progress-bar bg-white" style="width: {{ system_stats.network_usage }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- État des services -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-server me-2"></i>État des Services
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <strong>Serveur Web</strong>
+                            <br>
+                            <small class="text-muted">Apache/Nginx</small>
+                        </div>
+                        <span class="status-indicator status-online">
+                            <i class="fas fa-circle"></i>
+                            {{ system_stats.server_status }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <strong>Base de Données</strong>
+                            <br>
+                            <small class="text-muted">SQLite/PostgreSQL</small>
+                        </div>
+                        <span class="status-indicator status-online">
+                            <i class="fas fa-circle"></i>
+                            {{ system_stats.database_status }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <strong>Cache Redis</strong>
+                            <br>
+                            <small class="text-muted">Sessions & Cache</small>
+                        </div>
+                        <span class="status-indicator status-warning">
+                            <i class="fas fa-circle"></i>
+                            Maintenance
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Services Externes</strong>
+                            <br>
+                            <small class="text-muted">APIs & Intégrations</small>
+                        </div>
+                        <span class="status-indicator status-online">
+                            <i class="fas fa-circle"></i>
+                            Opérationnel
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Statistiques d'Usage
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="metric-value text-primary">{{ system_stats.active_users }}</div>
+                            <div class="metric-label">Utilisateurs Actifs</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="metric-value text-success">{{ system_stats.database_connections }}</div>
+                            <div class="metric-label">Connexions DB</div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-12">
+                            <div class="metric-value text-info">{{ system_stats.uptime }}</div>
+                            <div class="metric-label">Temps de Fonctionnement</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertes et Notifications -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-bell me-2"></i>Alertes Système
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert-card alert mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-exclamation-triangle fa-2x text-warning me-3"></i>
+                            <div>
+                                <strong>Utilisation mémoire élevée</strong>
+                                <br>
+                                <small>L'utilisation de la mémoire RAM atteint 67%. Surveillez l'activité du système.</small>
+                            </div>
+                            <div class="ms-auto">
+                                <span class="badge bg-warning">Moyenne</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert-card info mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-info-circle fa-2x text-info me-3"></i>
+                            <div>
+                                <strong>Dernière sauvegarde</strong>
+                                <br>
+                                <small>Sauvegarde automatique effectuée le {{ system_stats.last_backup }}</small>
+                            </div>
+                            <div class="ms-auto">
+                                <span class="badge bg-info">Info</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert-card info">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-check-circle fa-2x text-success me-3"></i>
+                            <div>
+                                <strong>Système opérationnel</strong>
+                                <br>
+                                <small>Tous les services fonctionnent normalement. Aucune intervention requise.</small>
+                            </div>
+                            <div class="ms-auto">
+                                <span class="badge bg-success">OK</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions rapides -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-tools me-2"></i>Actions Rapides
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-3">
+                        <button class="btn btn-outline-primary" onclick="restartServices()">
+                            <i class="fas fa-redo me-2"></i>Redémarrer Services
+                        </button>
+                        <button class="btn btn-outline-success" onclick="clearCache()">
+                            <i class="fas fa-broom me-2"></i>Vider le Cache
+                        </button>
+                        <button class="btn btn-outline-info" onclick="optimizeDatabase()">
+                            <i class="fas fa-database me-2"></i>Optimiser la DB
+                        </button>
+                        <button class="btn btn-outline-warning" onclick="generateReport()">
+                            <i class="fas fa-file-alt me-2"></i>Générer Rapport
+                        </button>
+                        <button class="btn btn-outline-danger" onclick="emergencyMode()">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Mode Urgence
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Actualiser le monitoring
+function refreshMonitoring() {
+    location.reload();
+}
+
+// Actions rapides
+function restartServices() {
+    if (confirm('Êtes-vous sûr de vouloir redémarrer les services ? Cela peut interrompre temporairement l\'accès.')) {
+        alert('Redémarrage des services en cours...');
+        // Ici on ferait l'appel API pour redémarrer
+    }
+}
+
+function clearCache() {
+    if (confirm('Vider le cache système ?')) {
+        alert('Cache vidé avec succès !');
+        // Ici on ferait l'appel API pour vider le cache
+    }
+}
+
+function optimizeDatabase() {
+    if (confirm('Optimiser la base de données ? Cette opération peut prendre quelques minutes.')) {
+        alert('Optimisation de la base de données en cours...');
+        // Ici on ferait l'appel API pour optimiser la DB
+    }
+}
+
+function generateReport() {
+    alert('Génération du rapport système en cours...');
+    // Ici on ferait l'appel API pour générer le rapport
+}
+
+function emergencyMode() {
+    if (confirm('Activer le mode urgence ? Seuls les administrateurs pourront accéder au système.')) {
+        alert('Mode urgence activé !');
+        // Ici on ferait l'appel API pour activer le mode urgence
+    }
+}
+
+// Mise à jour automatique toutes les 30 secondes
+setInterval(() => {
+    // Mise à jour silencieuse des métriques
+    console.log('Mise à jour automatique du monitoring...');
+    
+    // Ici on ferait des appels API pour récupérer les nouvelles métriques
+    // et mettre à jour l'interface sans recharger la page
+}, 30000);
+
+// Animation des barres de progression
+document.addEventListener('DOMContentLoaded', function() {
+    const progressBars = document.querySelectorAll('.progress-bar');
+    
+    progressBars.forEach(bar => {
+        const width = bar.style.width;
+        bar.style.width = '0%';
+        
+        setTimeout(() => {
+            bar.style.width = width;
+        }, 500);
+    });
+});
+</script>
+{% endblock %}

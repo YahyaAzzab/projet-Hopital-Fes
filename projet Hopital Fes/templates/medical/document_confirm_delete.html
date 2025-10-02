@@ -1,0 +1,326 @@
+{% extends 'medical/base.html' %}
+{% load static %}
+
+{% block title %}Supprimer {{ document.title }} - Hôpital EL GHASSANI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .delete-header {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .delete-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .delete-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .delete-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.9;
+    }
+
+    .delete-title {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .delete-meta {
+        font-size: 1rem;
+        opacity: 0.8;
+    }
+
+    .warning-container {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border-left: 4px solid #dc3545;
+    }
+
+    .warning-icon {
+        font-size: 2rem;
+        color: #dc3545;
+        margin-bottom: 1rem;
+    }
+
+    .warning-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #dc3545;
+        margin-bottom: 1rem;
+    }
+
+    .warning-text {
+        color: #666;
+        margin-bottom: 1.5rem;
+    }
+
+    .document-info {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #333;
+        min-width: 120px;
+    }
+
+    .info-value {
+        color: #666;
+        text-align: right;
+    }
+
+    .badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .badge-success {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .badge-warning {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .badge-danger {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .badge-info {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid #eee;
+    }
+
+    .btn-form {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        color: white;
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+        color: white;
+    }
+
+    .consequences {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+    .consequences-title {
+        font-weight: 600;
+        color: #856404;
+        margin-bottom: 0.5rem;
+    }
+
+    .consequences-list {
+        color: #856404;
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header de suppression -->
+    <div class="delete-header">
+        <div class="delete-content">
+            <div class="delete-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="delete-title">Supprimer le document</div>
+            <div class="delete-meta">{{ document.title }}</div>
+        </div>
+    </div>
+
+    <!-- Avertissement -->
+    <div class="warning-container">
+        <div class="warning-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="warning-title">Attention !</div>
+        <div class="warning-text">
+            Vous êtes sur le point de supprimer définitivement ce document. Cette action est irréversible.
+        </div>
+
+        <!-- Informations du document -->
+        <div class="document-info">
+            <h6 class="mb-3">
+                <i class="fas fa-info-circle me-2"></i>Document à supprimer
+            </h6>
+            
+            <div class="info-item">
+                <span class="info-label">Titre :</span>
+                <span class="info-value">{{ document.title }}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">Type :</span>
+                <span class="info-value">{{ document.get_document_type_display }}</span>
+            </div>
+            
+            {% if document.patient %}
+            <div class="info-item">
+                <span class="info-label">Patient :</span>
+                <span class="info-value">{{ document.patient.get_full_name }}</span>
+            </div>
+            {% endif %}
+            
+            <div class="info-item">
+                <span class="info-label">Priorité :</span>
+                <span class="info-value">
+                    <span class="badge 
+                        {% if document.priority == 'urgent' %}badge-danger
+                        {% elif document.priority == 'high' %}badge-warning
+                        {% elif document.priority == 'normal' %}badge-success
+                        {% else %}badge-info{% endif %}">
+                        {{ document.get_priority_display }}
+                    </span>
+                </span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">Statut :</span>
+                <span class="info-value">
+                    <span class="badge 
+                        {% if document.status == 'completed' %}badge-success
+                        {% elif document.status == 'processing' %}badge-warning
+                        {% elif document.status == 'error' %}badge-danger
+                        {% else %}badge-info{% endif %}">
+                        {{ document.get_status_display }}
+                    </span>
+                </span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">Créé le :</span>
+                <span class="info-value">{{ document.created_at|date:"d/m/Y à H:i" }}</span>
+            </div>
+            
+            {% if document.file %}
+            <div class="info-item">
+                <span class="info-label">Fichier :</span>
+                <span class="info-value">
+                    <a href="{{ document.file.url }}" target="_blank" class="text-decoration-none">
+                        {{ document.file.name }}
+                    </a>
+                </span>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Conséquences -->
+        <div class="consequences">
+            <div class="consequences-title">
+                <i class="fas fa-exclamation-circle me-2"></i>Conséquences de la suppression :
+            </div>
+            <ul class="consequences-list">
+                <li>Le document sera définitivement supprimé de la base de données</li>
+                <li>Le fichier associé sera supprimé du serveur</li>
+                <li>Toutes les métadonnées (IA, qualité, etc.) seront perdues</li>
+                <li>Cette action ne peut pas être annulée</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+        <a href="{% url 'view_document' document.id %}" class="btn-form btn-secondary">
+            <i class="fas fa-arrow-left"></i>
+            Annuler
+        </a>
+        
+        <form method="post" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn-form btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce document ? Cette action est irréversible.')">
+                <i class="fas fa-trash"></i>
+                Supprimer définitivement
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

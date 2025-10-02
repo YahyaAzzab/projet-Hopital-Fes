@@ -1,0 +1,1089 @@
+{% extends 'medical/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Hôpital EL GHASSANI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-card {
+        border-radius: 16px;
+        border: none;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        overflow: hidden;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .dashboard-card.patients {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .dashboard-card.reports {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .dashboard-card.users {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .dashboard-card.documents {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
+
+    .dashboard-card.messages {
+        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .dashboard-card.messages:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+    }
+
+    .dashboard-card.settings {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .dashboard-card.settings:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+    }
+
+    .stat-icon {
+        font-size: 3rem;
+        opacity: 0.8;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin: 0;
+    }
+
+    .stat-label {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    .chart-container {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+        position: relative;
+        height: 350px;
+    }
+
+    .chart-container canvas {
+        max-height: 280px !important;
+        width: 100% !important;
+    }
+
+    .chart-title {
+        color: var(--text-color);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .chart-title i {
+        margin-right: 0.5rem;
+        color: var(--primary-color);
+    }
+
+    .realtime-indicator {
+        display: inline-flex;
+        align-items: center;
+        background: #28a745;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        margin-left: auto;
+    }
+
+    .realtime-indicator .pulse {
+        width: 8px;
+        height: 8px;
+        background: white;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .activity-item:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.2rem;
+        color: white;
+    }
+
+    .activity-icon.patient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .activity-icon.report {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-title {
+        font-weight: 600;
+        margin: 0;
+        color: var(--text-color);
+    }
+
+    .activity-time {
+        font-size: 0.85rem;
+        color: var(--secondary-color);
+        margin: 0;
+    }
+
+    .metric-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .metric-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--primary-color);
+        margin: 0;
+    }
+
+    .metric-label {
+        color: var(--secondary-color);
+        margin: 0.5rem 0 0 0;
+        font-size: 0.9rem;
+    }
+
+    .urgent-alert {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        animation: urgentPulse 3s infinite;
+    }
+
+    @keyframes urgentPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+    }
+
+    .urgent-alert i {
+        font-size: 1.5rem;
+        margin-right: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+       <h1 class="h3 mb-0 text-gray-800">
+           <i class="fas fa-chart-line me-2"></i>
+           {% if user_role == 'admin' %}Dashboard Administrateur
+           {% elif user_role == 'doctor' %}Dashboard Médecin
+           {% elif user_role == 'nurse' %}Dashboard Infirmier
+           {% elif user_role == 'technician' %}Dashboard Technicien
+           {% else %}Dashboard{% endif %}
+       </h1>
+        <div class="realtime-indicator">
+            <div class="pulse"></div>
+            Temps réel
+        </div>
+    </div>
+
+    <!-- Alertes urgentes -->
+    {% if urgent_reports > 0 %}
+    <div class="urgent-alert">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div>
+            <strong>{{ urgent_reports }} rapport(s) urgent(s) nécessitent votre attention</strong>
+            <br><small>Veuillez les traiter en priorité</small>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Statistiques principales -->
+    {% if user_role != 'technician' %}
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="dashboard-card patients">
+                <div class="card-body d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <div class="stat-number" id="total-patients">{{ total_patients }}</div>
+                        <div class="stat-label">
+                            {% if user_role == 'admin' %}Patients totaux
+                            {% elif user_role == 'doctor' %}Patients créés
+                            {% elif user_role == 'nurse' %}Patients créés
+                            {% else %}Patients{% endif %}
+                        </div>
+                        <small class="opacity-75">+{{ patients_this_month }} ce mois</small>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-user-injured"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="dashboard-card reports">
+                <div class="card-body d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <div class="stat-number" id="total-reports">{{ total_reports }}</div>
+                        <div class="stat-label">
+                            {% if user_role == 'admin' %}Rapports totaux
+                            {% elif user_role == 'doctor' %}Mes rapports
+                            {% elif user_role == 'nurse' %}Mes rapports
+                            {% else %}Rapports{% endif %}
+                        </div>
+                        <small class="opacity-75">+{{ reports_this_month }} ce mois</small>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-file-medical"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if user_role == 'admin' %}
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="dashboard-card users">
+                <div class="card-body d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <div class="stat-number" id="total-users">{{ total_users }}</div>
+                        <div class="stat-label">Utilisateurs</div>
+                        <small class="opacity-75">{{ active_users }} actifs</small>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="dashboard-card documents">
+                <div class="card-body d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <div class="stat-number" id="total-documents">{{ total_documents }}</div>
+                        <div class="stat-label">
+                            {% if user_role == 'admin' %}Documents totaux
+                            {% elif user_role == 'doctor' %}Mes documents
+                            {% elif user_role == 'nurse' %}Mes documents
+                            {% else %}Documents{% endif %}
+                        </div>
+                        <small class="opacity-75">
+                            {% if user_role == 'admin' %}Archives médicales
+                            {% else %}Mes archives{% endif %}
+                        </small>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+<!-- Deuxième ligne - Messages (Admin seulement) -->
+{% if user_role == 'admin' %}
+<div class="row mb-4 justify-content-center">
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="dashboard-card messages" onclick="location.href='{% url 'messages' %}'">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <div class="stat-number" id="unread-messages-count">0</div>
+                    <div class="stat-label">Messages</div>
+                    <small class="opacity-75">Communication interne</small>
+                </div>
+                <div class="stat-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Section spéciale pour Technicien -->
+{% if user_role == 'technician' %}
+<div class="row mb-4">
+    <div class="col-md-6 mb-4">
+        <div class="dashboard-card messages" onclick="location.href='{% url 'messages' %}'">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <div class="stat-number" id="unread-messages-count">0</div>
+                    <div class="stat-label">Messages</div>
+                    <small class="opacity-75">Communication interne</small>
+                </div>
+                <div class="stat-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="dashboard-card settings" onclick="location.href='{% url 'settings' %}'">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <div class="stat-number">
+                        <i class="fas fa-cog fa-2x"></i>
+                    </div>
+                    <div class="stat-label">Paramètres</div>
+                    <small class="opacity-75">Configuration système</small>
+                </div>
+                <div class="stat-icon">
+                    <i class="fas fa-sliders-h"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Deuxième ligne pour le technicien -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-4">
+        <div class="dashboard-card" onclick="location.href='{% url 'system_logs' %}'" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; cursor: pointer; transition: all 0.3s ease;">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <div class="stat-number">5</div>
+                    <div class="stat-label">Logs Système</div>
+                    <small class="opacity-75">Journal des événements</small>
+                </div>
+                <div class="stat-icon">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="dashboard-card" onclick="location.href='{% url 'system_monitor' %}'" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; cursor: pointer; transition: all 0.3s ease;">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <div class="stat-number">67%</div>
+                    <div class="stat-label">Monitoring</div>
+                    <small class="opacity-75">État du système</small>
+                </div>
+                <div class="stat-icon">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Troisième ligne pour le technicien -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-4">
+        <div class="dashboard-card" onclick="location.href='{% url 'backup_restore' %}'" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; cursor: pointer; transition: all 0.3s ease;">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">Sauvegardes</div>
+                    <small class="opacity-75">6.3 MB total</small>
+                </div>
+                <div class="stat-icon">
+                    <i class="fas fa-database"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="dashboard-card" onclick="location.href='{% url 'maintenance' %}'" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; cursor: pointer; transition: all 0.3s ease;">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">Maintenance</div>
+                    <small class="opacity-75">Tâches planifiées</small>
+                </div>
+                <div class="stat-icon">
+                    <i class="fas fa-tools"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Informations pour le technicien -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <h5><i class="fas fa-info-circle me-2"></i>Accès Technicien</h5>
+            <p class="mb-0">En tant que technicien, vous avez accès aux fonctionnalités de maintenance et de monitoring système. Utilisez les sections ci-dessus pour surveiller et maintenir la plateforme.</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+    <!-- Graphiques -->
+    {% if user_role != 'technician' %}
+    <div class="row mb-4">
+        <!-- Graphique temporel -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="chart-container">
+                <div class="chart-title">
+                    <i class="fas fa-chart-line"></i>
+                    Activité des 7 derniers jours
+                </div>
+                <div style="position: relative; height: 280px;">
+                    <canvas id="activityChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphique en temps réel -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="chart-container">
+                <div class="chart-title">
+                    <i class="fas fa-clock"></i>
+                    Activité dernière heure
+                    <div class="realtime-indicator">
+                        <div class="pulse"></div>
+                        Live
+                    </div>
+                </div>
+                <div style="position: relative; height: 280px;">
+                    <canvas id="realtimeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques de répartition -->
+    <div class="row mb-4">
+        <!-- Patients par statut -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="chart-container">
+                <div class="chart-title">
+                    <i class="fas fa-user-check"></i>
+                    Patients par statut
+                </div>
+                <div style="position: relative; height: 280px;">
+                    <canvas id="patientsStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rapports par type -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="chart-container">
+                <div class="chart-title">
+                    <i class="fas fa-chart-pie"></i>
+                    Rapports par type
+                </div>
+                <div style="position: relative; height: 280px;">
+                    <canvas id="reportsTypeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rapports par priorité -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="chart-container">
+                <div class="chart-title">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Rapports par priorité
+                </div>
+                <div style="position: relative; height: 280px;">
+                    <canvas id="reportsPriorityChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activité récente -->
+    <div class="row">
+        <!-- Patients récents -->
+        <div class="col-xl-6 col-lg-6 mb-4">
+            <div class="chart-container">
+                <div class="chart-title">
+                    <i class="fas fa-user-plus"></i>
+                    Patients récents
+                </div>
+                <div id="recent-patients">
+                    {% for patient in recent_patients %}
+                    <div class="activity-item">
+                        <div class="activity-icon patient">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">{{ patient.get_full_name }}</div>
+                            <div class="activity-time">{{ patient.created_at|date:"d/m/Y à H:i" }}</div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted text-center">Aucun patient récent</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications en temps réel -->
+        <div class="col-xl-6 col-lg-6 mb-4">
+            <div class="chart-container">
+                <div class="chart-title d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-bell"></i>
+                        Notifications récentes
+                    </div>
+                    <span class="badge bg-danger" id="notificationBadge">0</span>
+                </div>
+                <div id="notificationsList" style="max-height: 300px; overflow-y: auto;">
+                    <div class="text-center py-3">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">Chargement...</span>
+                        </div>
+                        <div class="mt-2 text-muted">Chargement des notifications...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+{% if user_role != 'technician' %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endif %}
+
+<script>
+// Configuration des couleurs
+const colors = {
+    primary: '#007bff',
+    success: '#28a745',
+    warning: '#ffc107',
+    danger: '#dc3545',
+    info: '#17a2b8',
+    light: '#f8f9fa',
+    dark: '#343a40'
+};
+
+{% if user_role != 'technician' %}
+// Graphique d'activité des 7 derniers jours
+const activityCtx = document.getElementById('activityChart').getContext('2d');
+const activityChart = new Chart(activityCtx, {
+    type: 'line',
+    data: {
+        labels: {{ last_7_days|safe }},
+        datasets: [{
+            label: 'Patients',
+            data: {{ patients_chart_data|safe }},
+            borderColor: colors.primary,
+            backgroundColor: colors.primary + '20',
+            tension: 0.4,
+            fill: true,
+            pointRadius: 4,
+            pointHoverRadius: 6
+        }, {
+            label: 'Rapports',
+            data: {{ reports_chart_data|safe }},
+            borderColor: colors.danger,
+            backgroundColor: colors.danger + '20',
+            tension: 0.4,
+            fill: true,
+            pointRadius: 4,
+            pointHoverRadius: 6
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+            intersect: false,
+            mode: 'index'
+        },
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: {
+                    usePointStyle: true,
+                    padding: 20
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                titleColor: 'white',
+                bodyColor: 'white',
+                borderColor: colors.primary,
+                borderWidth: 1
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: 'rgba(0,0,0,0.1)',
+                    drawBorder: false
+                },
+                ticks: {
+                    color: '#666',
+                    font: {
+                        size: 12
+                    }
+                }
+            },
+            x: {
+                grid: {
+                    color: 'rgba(0,0,0,0.1)',
+                    drawBorder: false
+                },
+                ticks: {
+                    color: '#666',
+                    font: {
+                        size: 12
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Graphique en temps réel (initialisation)
+const realtimeCtx = document.getElementById('realtimeChart').getContext('2d');
+let realtimeChart = new Chart(realtimeCtx, {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [{
+            label: 'Patients/heure',
+            data: [],
+            borderColor: colors.success,
+            backgroundColor: colors.success + '20',
+            tension: 0.4,
+            fill: true,
+            pointRadius: 3,
+            pointHoverRadius: 5
+        }, {
+            label: 'Rapports/heure',
+            data: [],
+            borderColor: colors.warning,
+            backgroundColor: colors.warning + '20',
+            tension: 0.4,
+            fill: true,
+            pointRadius: 3,
+            pointHoverRadius: 5
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+            intersect: false,
+            mode: 'index'
+        },
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: {
+                    usePointStyle: true,
+                    padding: 15
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                titleColor: 'white',
+                bodyColor: 'white',
+                borderColor: colors.success,
+                borderWidth: 1
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: 'rgba(0,0,0,0.1)',
+                    drawBorder: false
+                },
+                ticks: {
+                    color: '#666',
+                    font: {
+                        size: 11
+                    }
+                }
+            },
+            x: {
+                grid: {
+                    color: 'rgba(0,0,0,0.1)',
+                    drawBorder: false
+                },
+                ticks: {
+                    color: '#666',
+                    font: {
+                        size: 11
+                    },
+                    maxTicksLimit: 6
+                }
+            }
+        }
+    }
+});
+
+// Graphique patients par statut
+const patientsStatusCtx = document.getElementById('patientsStatusChart').getContext('2d');
+const patientsStatusChart = new Chart(patientsStatusCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Actif', 'Inactif', 'En attente'],
+        datasets: [{
+            data: [{{ active_users }}, {{ inactive_users }}, 0],
+            backgroundColor: [
+                colors.success,
+                colors.warning,
+                colors.danger
+            ],
+            borderWidth: 0,
+            hoverOffset: 4
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '60%',
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    usePointStyle: true,
+                    padding: 15,
+                    font: {
+                        size: 12
+                    }
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                titleColor: 'white',
+                bodyColor: 'white',
+                callbacks: {
+                    label: function(context) {
+                        return context.label + ': ' + context.parsed;
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Graphique rapports par type
+const reportsTypeCtx = document.getElementById('reportsTypeChart').getContext('2d');
+const reportsTypeChart = new Chart(reportsTypeCtx, {
+    type: 'pie',
+    data: {
+        labels: ['Consultation', 'Urgence', 'Suivi', 'Autre'],
+        datasets: [{
+            data: [{{ total_reports|floatformat:0|add:0|floatformat:0 }}, {{ urgent_reports }}, {{ total_reports|floatformat:0|add:0|floatformat:0 }}, 0],
+            backgroundColor: [
+                colors.info,
+                colors.danger,
+                colors.primary,
+                colors.warning
+            ],
+            borderWidth: 0,
+            hoverOffset: 4
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    usePointStyle: true,
+                    padding: 15,
+                    font: {
+                        size: 12
+                    }
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                titleColor: 'white',
+                bodyColor: 'white',
+                callbacks: {
+                    label: function(context) {
+                        return context.label + ': ' + context.parsed;
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Graphique rapports par priorité
+const reportsPriorityCtx = document.getElementById('reportsPriorityChart').getContext('2d');
+const reportsPriorityChart = new Chart(reportsPriorityCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Normale', 'Haute', 'Urgente'],
+        datasets: [{
+            label: 'Nombre de rapports',
+            data: [{{ total_reports|floatformat:0|add:0|floatformat:0 }}, {{ urgent_reports }}, {{ urgent_reports }}],
+            backgroundColor: [
+                colors.success,
+                colors.warning,
+                colors.danger
+            ],
+            borderRadius: 8,
+            borderSkipped: false,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                titleColor: 'white',
+                bodyColor: 'white',
+                callbacks: {
+                    label: function(context) {
+                        return context.label + ': ' + context.parsed.y;
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: 'rgba(0,0,0,0.1)',
+                    drawBorder: false
+                },
+                ticks: {
+                    color: '#666',
+                    font: {
+                        size: 12
+                    }
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                },
+                ticks: {
+                    color: '#666',
+                    font: {
+                        size: 12
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Fonction pour mettre à jour les données en temps réel
+function updateRealtimeData() {
+    fetch('/api/dashboard/')
+        .then(response => response.json())
+        .then(data => {
+            // Mettre à jour les statistiques principales
+            document.getElementById('total-patients').textContent = data.total_patients;
+            document.getElementById('total-reports').textContent = data.total_reports;
+            document.getElementById('total-users').textContent = data.total_users;
+            
+            // Mettre à jour le graphique temps réel
+            realtimeChart.data.labels = data.last_24_hours.slice(-12); // Dernières 12 heures
+            realtimeChart.data.datasets[0].data = data.patients_hourly.slice(-12);
+            realtimeChart.data.datasets[1].data = data.reports_hourly.slice(-12);
+            realtimeChart.update('none');
+        })
+        .catch(error => {
+            console.error('Erreur lors de la mise à jour des données:', error);
+        });
+}
+
+// Fonction pour charger les notifications
+function loadNotifications() {
+    fetch('/api/notifications/')
+        .then(response => response.json())
+        .then(data => {
+            const notificationsList = document.getElementById('notificationsList');
+            const notificationBadge = document.getElementById('notificationBadge');
+            
+            // Mettre à jour le badge
+            notificationBadge.textContent = data.unread_count;
+            notificationBadge.style.display = data.unread_count > 0 ? 'inline' : 'none';
+            
+            // Afficher les notifications
+            if (data.notifications.length === 0) {
+                notificationsList.innerHTML = '<p class="text-muted text-center py-3">Aucune notification récente</p>';
+                return;
+            }
+            
+            let notificationsHtml = '';
+            data.notifications.forEach(notification => {
+                const isRecent = notification.is_recent ? 'border-start border-3 border-warning' : '';
+                const actionIcon = getActionIcon(notification.action);
+                const actionColor = getActionColor(notification.action_color);
+                
+                notificationsHtml += `
+                    <div class="notification-item ${isRecent} p-2 mb-2 bg-light rounded">
+                        <div class="d-flex align-items-start">
+                            <div class="me-2">
+                                <i class="fas ${actionIcon} text-${actionColor}"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="small fw-bold">${notification.description}</div>
+                                <div class="small text-muted">
+                                    Par ${notification.user} • ${notification.created_at}
+                                    ${notification.is_recent ? '<span class="badge bg-warning text-dark ms-1">Nouveau</span>' : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            notificationsList.innerHTML = notificationsHtml;
+        })
+        .catch(error => {
+            console.error('Erreur lors du chargement des notifications:', error);
+            document.getElementById('notificationsList').innerHTML = '<p class="text-danger text-center py-3">Erreur de chargement</p>';
+        });
+}
+
+// Fonction pour obtenir l'icône selon l'action
+function getActionIcon(action) {
+    const icons = {
+        'patient_created': 'fa-user-plus',
+        'patient_updated': 'fa-user-edit',
+        'patient_deleted': 'fa-user-times',
+        'document_uploaded': 'fa-file-upload',
+        'document_processed': 'fa-file-check',
+        'report_created': 'fa-file-medical',
+        'report_approved': 'fa-check-circle',
+        'login': 'fa-sign-in-alt',
+        'logout': 'fa-sign-out-alt'
+    };
+    return icons[action] || 'fa-bell';
+}
+
+// Fonction pour obtenir la couleur selon l'action
+function getActionColor(color) {
+    const colors = {
+        'success': 'success',
+        'primary': 'primary',
+        'danger': 'danger',
+        'warning': 'warning',
+        'info': 'info'
+    };
+    return colors[color] || 'primary';
+}
+
+// Fonction pour mettre à jour le compteur de messages
+function updateMessagesCount() {
+    fetch('/communication/api/get-messages/')
+        .then(response => response.json())
+        .then(data => {
+            const countElement = document.getElementById('unread-messages-count');
+            if (countElement) {
+                countElement.textContent = data.unread_messages_count;
+                
+                // Ajouter une animation si il y a des messages non lus
+                if (data.unread_messages_count > 0) {
+                    countElement.style.color = '#ff4757';
+                    countElement.style.animation = 'pulse 2s infinite';
+                } else {
+                    countElement.style.color = '';
+                    countElement.style.animation = '';
+                }
+            }
+        })
+        .catch(error => console.error('Erreur lors du chargement des messages:', error));
+}
+
+// Mise à jour automatique toutes les 30 secondes
+setInterval(function() {
+    updateRealtimeData();
+    loadNotifications();
+    updateMessagesCount();
+}, 30000);
+
+// Mise à jour initiale des messages
+document.addEventListener('DOMContentLoaded', function() {
+    updateMessagesCount();
+});
+
+// Mise à jour initiale
+updateRealtimeData();
+loadNotifications();
+
+{% endif %}
+
+// Animation des cartes au survol
+document.querySelectorAll('.dashboard-card').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-5px) scale(1.02)';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0) scale(1)';
+    });
+});
+</script>
+{% endblock %}

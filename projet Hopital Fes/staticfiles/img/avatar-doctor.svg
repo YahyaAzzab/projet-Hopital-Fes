@@ -1,0 +1,38 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fond circulaire -->
+  <circle cx="60" cy="60" r="60" fill="#E3F2FD"/>
+  
+  <!-- Corps du médecin -->
+  <circle cx="60" cy="75" r="25" fill="#2196F3"/>
+  
+  <!-- Tête -->
+  <circle cx="60" cy="45" r="20" fill="#FFDBAC"/>
+  
+  <!-- Blouse blanche -->
+  <path d="M45 75 L45 90 L75 90 L75 75 L70 70 L50 70 Z" fill="white"/>
+  
+  <!-- Col de la blouse -->
+  <path d="M50 70 L50 65 L70 65 L70 70" fill="white"/>
+  
+  <!-- Stéthoscope -->
+  <path d="M55 70 Q50 65 45 70 Q50 75 55 70" stroke="#37474F" stroke-width="2" fill="none"/>
+  <circle cx="45" cy="70" r="3" fill="#37474F"/>
+  <circle cx="55" cy="70" r="3" fill="#37474F"/>
+  
+  <!-- Yeux -->
+  <circle cx="55" cy="42" r="2" fill="#37474F"/>
+  <circle cx="65" cy="42" r="2" fill="#37474F"/>
+  
+  <!-- Sourire -->
+  <path d="M55 48 Q60 52 65 48" stroke="#37474F" stroke-width="1.5" fill="none"/>
+  
+  <!-- Cheveux -->
+  <path d="M45 35 Q60 25 75 35 Q70 30 60 30 Q50 30 45 35" fill="#8D6E63"/>
+  
+  <!-- Croix médicale sur la blouse -->
+  <rect x="58" y="80" width="4" height="8" fill="#F44336"/>
+  <rect x="55" y="83" width="10" height="2" fill="#F44336"/>
+  
+  <!-- Bordure -->
+  <circle cx="60" cy="60" r="58" stroke="#BBDEFB" stroke-width="4" fill="none"/>
+</svg>

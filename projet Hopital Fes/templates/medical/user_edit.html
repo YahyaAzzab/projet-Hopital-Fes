@@ -1,0 +1,101 @@
+{% extends 'medical/base.html' %}
+{% load static %}
+
+{% block title %}Modifier Utilisateur - Hôpital EL GHASSANI{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-user-edit me-2"></i>Modifier Utilisateur - {{ edited_user.get_full_name }}
+                </h6>
+                <a href="{% url 'users' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Retour
+                </a>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Prénom *</label>
+                                <input type="text" class="form-control" name="first_name" value="{{ edited_user.first_name }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Nom *</label>
+                                <input type="text" class="form-control" name="last_name" value="{{ edited_user.last_name }}" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Email *</label>
+                                <input type="email" class="form-control" name="email" value="{{ edited_user.email }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Nom d'utilisateur *</label>
+                                <input type="text" class="form-control" value="{{ edited_user.username }}" readonly>
+                                <small class="form-text text-muted">Le nom d'utilisateur ne peut pas être modifié</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Rôle *</label>
+                                <select class="form-select" name="role" required>
+                                    <option value="admin" {% if edited_user.role == 'admin' %}selected{% endif %}>Administrateur</option>
+                                    <option value="doctor" {% if edited_user.role == 'doctor' %}selected{% endif %}>Médecin</option>
+                                    <option value="nurse" {% if edited_user.role == 'nurse' %}selected{% endif %}>Infirmier</option>
+                                    <option value="technician" {% if edited_user.role == 'technician' %}selected{% endif %}>Technicien</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Département</label>
+                                <input type="text" class="form-control" name="department" value="{{ edited_user.department|default:'' }}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nouveau mot de passe</label>
+                        <input type="password" class="form-control" name="password" placeholder="Laisser vide pour ne pas changer">
+                        <small class="form-text text-muted">Laissez vide si vous ne voulez pas changer le mot de passe</small>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="is_active" id="is_active" 
+                                           {% if edited_user.is_active %}checked{% endif %}>
+                                    <label class="form-check-label" for="is_active">
+                                        Compte actif
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-end">
+                        <a href="{% url 'users' %}" class="btn btn-secondary me-2">
+                            <i class="fas fa-times me-2"></i>Annuler
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Sauvegarder
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

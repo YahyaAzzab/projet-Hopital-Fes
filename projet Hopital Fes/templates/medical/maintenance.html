@@ -1,0 +1,591 @@
+{% extends 'medical/base.html' %}
+{% load static %}
+
+{% block title %}Maintenance Système - Hôpital EL GHASSANI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .maintenance-card {
+        transition: all 0.3s ease;
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    
+    .maintenance-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .task-status {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .status-running {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .status-completed {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        color: white;
+    }
+    
+    .status-pending {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        color: white;
+    }
+    
+    .status-failed {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        color: white;
+    }
+    
+    .progress-ring {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto;
+    }
+    
+    .progress-ring circle {
+        fill: transparent;
+        stroke-width: 8;
+        stroke-linecap: round;
+        transform: rotate(-90deg);
+        transform-origin: 50% 50%;
+    }
+    
+    .progress-ring .progress-circle {
+        stroke: #667eea;
+        stroke-dasharray: 251.2;
+        stroke-dashoffset: 251.2;
+        transition: stroke-dashoffset 0.5s ease;
+    }
+    
+    .progress-ring .background-circle {
+        stroke: #e9ecef;
+    }
+    
+    .task-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: white;
+    }
+    
+    .icon-database {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .icon-cleanup {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
+    
+    .icon-security {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+    
+    .icon-update {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    }
+    
+    .maintenance-stats {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 20px;
+    }
+    
+    .quick-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .quick-action-btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .btn-primary-action {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-success-action {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        color: white;
+    }
+    
+    .btn-warning-action {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        color: white;
+    }
+    
+    .btn-danger-action {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        color: white;
+    }
+    
+    .quick-action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow maintenance-card">
+            <div class="card-header py-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <h6 class="m-0 font-weight-bold">
+                    <i class="fas fa-tools me-2"></i>Maintenance Système
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Interface de maintenance système pour les techniciens. Gérez les tâches de maintenance et surveillez l'état du système.
+                </div>
+                
+                <!-- Statistiques de maintenance -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="maintenance-stats">
+                            <div class="row text-center">
+                                <div class="col-md-3 mb-3">
+                                    <div class="d-flex align-items-center justify-content-center">
+                                        <div class="progress-ring me-3">
+                                            <svg width="80" height="80">
+                                                <circle class="background-circle" cx="40" cy="40" r="32"></circle>
+                                                <circle class="progress-circle" cx="40" cy="40" r="32" style="stroke-dashoffset: 75.36;"></circle>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h4 class="mb-1">3</h4>
+                                            <small>Tâches Actives</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="d-flex align-items-center justify-content-center">
+                                        <div class="progress-ring me-3">
+                                            <svg width="80" height="80">
+                                                <circle class="background-circle" cx="40" cy="40" r="32"></circle>
+                                                <circle class="progress-circle" cx="40" cy="40" r="32" style="stroke-dashoffset: 125.6;"></circle>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h4 class="mb-1">2</h4>
+                                            <small>Terminées</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="d-flex align-items-center justify-content-center">
+                                        <div class="progress-ring me-3">
+                                            <svg width="80" height="80">
+                                                <circle class="background-circle" cx="40" cy="40" r="32"></circle>
+                                                <circle class="progress-circle" cx="40" cy="40" r="32" style="stroke-dashoffset: 188.4;"></circle>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h4 class="mb-1">1</h4>
+                                            <small>En Attente</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="d-flex align-items-center justify-content-center">
+                                        <div class="progress-ring me-3">
+                                            <svg width="80" height="80">
+                                                <circle class="background-circle" cx="40" cy="40" r="32"></circle>
+                                                <circle class="progress-circle" cx="40" cy="40" r="32" style="stroke-dashoffset: 251.2;"></circle>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h4 class="mb-1">0</h4>
+                                            <small>Échecs</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Actions rapides -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-bolt me-2"></i>Actions Rapides
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="quick-actions">
+                                    <button class="quick-action-btn btn-primary-action" onclick="runQuickAction('cleanup')">
+                                        <i class="fas fa-broom me-1"></i>Nettoyer le Cache
+                                    </button>
+                                    <button class="quick-action-btn btn-success-action" onclick="runQuickAction('backup')">
+                                        <i class="fas fa-database me-1"></i>Sauvegarde Rapide
+                                    </button>
+                                    <button class="quick-action-btn btn-warning-action" onclick="runQuickAction('optimize')">
+                                        <i class="fas fa-cogs me-1"></i>Optimiser la Base
+                                    </button>
+                                    <button class="quick-action-btn btn-danger-action" onclick="runQuickAction('restart')">
+                                        <i class="fas fa-power-off me-1"></i>Redémarrer Services
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tâches de maintenance -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-list me-2"></i>Tâches de Maintenance Planifiées
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                {% for task in maintenance_tasks %}
+                                <div class="row align-items-center mb-3 p-3 border rounded" style="background: #f8f9fa;">
+                                    <div class="col-md-1">
+                                        <div class="task-icon {{ task.icon_class }}">
+                                            <i class="{{ task.icon }}"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6 class="mb-1">{{ task.name }}</h6>
+                                        <small class="text-muted">{{ task.description }}</small>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <span class="task-status status-{{ task.status|lower }}">
+                                            {{ task.status_display }}
+                                        </span>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock me-1"></i>{{ task.scheduled_time }}
+                                        </small>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="progress" style="height: 6px;">
+                                            <div class="progress-bar" role="progressbar" style="width: {{ task.progress }}%" aria-valuenow="{{ task.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small class="text-muted">{{ task.progress }}%</small>
+                                    </div>
+                                    <div class="col-md-1">
+                                        {% if task.status == 'Running' %}
+                                        <button class="btn btn-sm btn-outline-danger" onclick="stopTask({{ task.id }})">
+                                            <i class="fas fa-stop"></i>
+                                        </button>
+                                        {% elif task.status == 'Pending' %}
+                                        <button class="btn btn-sm btn-outline-primary" onclick="startTask({{ task.id }})">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                        {% elif task.status == 'Completed' %}
+                                        <button class="btn btn-sm btn-outline-success" onclick="viewTaskLog({{ task.id }})">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Historique des tâches -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-history me-2"></i>Historique Récent
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Tâche</th>
+                                                <th>Type</th>
+                                                <th>Statut</th>
+                                                <th>Début</th>
+                                                <th>Durée</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <i class="fas fa-database text-primary me-2"></i>
+                                                    Sauvegarde Base de Données
+                                                </td>
+                                                <td><span class="badge bg-info">Sauvegarde</span></td>
+                                                <td><span class="task-status status-completed">Terminé</span></td>
+                                                <td>01/10/2025 02:00</td>
+                                                <td>15 min</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary" onclick="viewTaskLog(1)">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <i class="fas fa-broom text-success me-2"></i>
+                                                    Nettoyage Fichiers Temporaires
+                                                </td>
+                                                <td><span class="badge bg-success">Nettoyage</span></td>
+                                                <td><span class="task-status status-completed">Terminé</span></td>
+                                                <td>01/10/2025 01:30</td>
+                                                <td>8 min</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary" onclick="viewTaskLog(2)">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <i class="fas fa-shield-alt text-warning me-2"></i>
+                                                    Vérification Sécurité
+                                                </td>
+                                                <td><span class="badge bg-warning">Sécurité</span></td>
+                                                <td><span class="task-status status-completed">Terminé</span></td>
+                                                <td>01/10/2025 01:00</td>
+                                                <td>25 min</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary" onclick="viewTaskLog(3)">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour les logs de tâches -->
+<div class="modal fade" id="taskLogModal" tabindex="-1" aria-labelledby="taskLogModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="taskLogModalLabel">
+                    <i class="fas fa-file-alt me-2"></i>Logs de Tâche
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="taskLogContent">
+                    <!-- Contenu des logs sera chargé ici -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-primary" onclick="downloadTaskLog()">
+                    <i class="fas fa-download me-1"></i>Télécharger
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function runQuickAction(action) {
+    const actionTexts = {
+        'cleanup': 'Nettoyage du cache en cours...',
+        'backup': 'Sauvegarde rapide en cours...',
+        'optimize': 'Optimisation de la base de données...',
+        'restart': 'Redémarrage des services...'
+    };
+    
+    const actionIcons = {
+        'cleanup': 'fas fa-broom',
+        'backup': 'fas fa-database',
+        'optimize': 'fas fa-cogs',
+        'restart': 'fas fa-power-off'
+    };
+    
+    // Afficher une notification
+    showNotification(actionTexts[action], actionIcons[action]);
+    
+    // Simuler l'action
+    setTimeout(() => {
+        showNotification('Action terminée avec succès', 'fas fa-check-circle', 'success');
+    }, 2000);
+}
+
+function startTask(taskId) {
+    showNotification('Démarrage de la tâche...', 'fas fa-play');
+    
+    // Simuler le démarrage
+    setTimeout(() => {
+        showNotification('Tâche démarrée avec succès', 'fas fa-check-circle', 'success');
+        location.reload(); // Recharger pour mettre à jour l'état
+    }, 1500);
+}
+
+function stopTask(taskId) {
+    if (confirm('Êtes-vous sûr de vouloir arrêter cette tâche ?')) {
+        showNotification('Arrêt de la tâche...', 'fas fa-stop');
+        
+        // Simuler l'arrêt
+        setTimeout(() => {
+            showNotification('Tâche arrêtée', 'fas fa-check-circle', 'success');
+            location.reload(); // Recharger pour mettre à jour l'état
+        }, 1000);
+    }
+}
+
+function viewTaskLog(taskId) {
+    const logs = {
+        1: {
+            task: 'Sauvegarde Base de Données',
+            logs: [
+                '2025-10-01 02:00:00 - Début de la sauvegarde',
+                '2025-10-01 02:05:00 - Sauvegarde des tables utilisateurs...',
+                '2025-10-01 02:08:00 - Sauvegarde des données patients...',
+                '2025-10-01 02:12:00 - Sauvegarde des documents médicaux...',
+                '2025-10-01 02:15:00 - Compression des données...',
+                '2025-10-01 02:15:00 - Sauvegarde terminée avec succès'
+            ]
+        },
+        2: {
+            task: 'Nettoyage Fichiers Temporaires',
+            logs: [
+                '2025-10-01 01:30:00 - Début du nettoyage',
+                '2025-10-01 01:32:00 - Suppression des fichiers de cache...',
+                '2025-10-01 01:35:00 - Suppression des logs anciens...',
+                '2025-10-01 01:37:00 - Nettoyage des sessions expirées...',
+                '2025-10-01 01:38:00 - Nettoyage terminé - 245 MB libérés'
+            ]
+        },
+        3: {
+            task: 'Vérification Sécurité',
+            logs: [
+                '2025-10-01 01:00:00 - Début de la vérification de sécurité',
+                '2025-10-01 01:05:00 - Vérification des permissions...',
+                '2025-10-01 01:10:00 - Analyse des logs d\'accès...',
+                '2025-10-01 01:15:00 - Vérification des mots de passe...',
+                '2025-10-01 01:20:00 - Scan des vulnérabilités...',
+                '2025-10-01 01:25:00 - Vérification terminée - Aucune vulnérabilité détectée'
+            ]
+        }
+    };
+    
+    const taskLog = logs[taskId];
+    if (!taskLog) {
+        showNotification('Logs non disponibles', 'fas fa-exclamation-triangle', 'warning');
+        return;
+    }
+    
+    // Afficher le modal avec les logs
+    document.getElementById('taskLogModalLabel').innerHTML = 
+        `<i class="fas fa-file-alt me-2"></i>Logs - ${taskLog.task}`;
+    
+    const logContent = document.getElementById('taskLogContent');
+    logContent.innerHTML = `
+        <div class="bg-dark text-light p-3 rounded" style="font-family: 'Courier New', monospace; font-size: 0.9rem;">
+            ${taskLog.logs.map(log => `<div class="mb-1">${log}</div>`).join('')}
+        </div>
+    `;
+    
+    const modal = new bootstrap.Modal(document.getElementById('taskLogModal'));
+    modal.show();
+}
+
+function downloadTaskLog() {
+    const logContent = document.getElementById('taskLogContent').textContent;
+    const blob = new Blob([logContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `maintenance_log_${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showNotification('Log téléchargé avec succès', 'fas fa-download', 'success');
+}
+
+function showNotification(message, icon, type = 'info') {
+    // Créer l'élément de notification
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info'} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        <i class="${icon} me-2"></i>${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    // Ajouter au DOM
+    document.body.appendChild(notification);
+    
+    // Supprimer automatiquement après 3 secondes
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 3000);
+}
+
+// Mettre à jour les statistiques en temps réel
+function updateMaintenanceStats() {
+    // Simulation de mise à jour des statistiques
+    const progressCircles = document.querySelectorAll('.progress-circle');
+    progressCircles.forEach(circle => {
+        const currentOffset = parseFloat(circle.style.strokeDashoffset);
+        const newOffset = Math.max(0, currentOffset - 10);
+        circle.style.strokeDashoffset = newOffset;
+    });
+}
+
+// Démarrer la mise à jour automatique
+setInterval(updateMaintenanceStats, 5000);
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation des cercles de progression
+    setTimeout(() => {
+        const circles = document.querySelectorAll('.progress-circle');
+        circles.forEach((circle, index) => {
+            setTimeout(() => {
+                circle.style.transition = 'stroke-dashoffset 1s ease';
+            }, index * 200);
+        });
+    }, 500);
+});
+</script>
+{% endblock %}

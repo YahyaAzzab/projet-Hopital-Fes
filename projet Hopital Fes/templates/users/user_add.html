@@ -1,0 +1,413 @@
+{% extends 'medical/base.html' %}
+{% load static %}
+
+{% block title %}Nouvel Utilisateur{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<style>
+    .form-section {
+        background: #fff;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-left: 4px solid #007bff;
+    }
+    
+    .form-section h3 {
+        color: #007bff;
+        margin-bottom: 20px;
+        font-size: 1.3em;
+        display: flex;
+        align-items: center;
+    }
+    
+    .form-section h3 i {
+        margin-right: 10px;
+        font-size: 1.2em;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+        display: block;
+    }
+    
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 12px 15px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        margin-right: 10px;
+    }
+    
+    .alert {
+        border-radius: 8px;
+        border: none;
+        padding: 15px 20px;
+    }
+    
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+        font-weight: bold;
+    }
+    
+    .role-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+        margin-right: 8px;
+    }
+    
+    .role-admin { background: #dc3545; color: white; }
+    .role-doctor { background: #007bff; color: white; }
+    .role-nurse { background: #28a745; color: white; }
+    .role-technician { background: #ffc107; color: #212529; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-user-plus"></i> Nouvel Utilisateur</h2>
+                <a href="{% url 'users' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour aux Utilisateurs
+                </a>
+            </div>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <!-- Informations de connexion -->
+                <div class="form-section">
+                    <h3><i class="fas fa-key"></i> Informations de connexion</h3>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id_username" class="required-field">Nom d'utilisateur</label>
+                                {{ form.username }}
+                                {% if form.username.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.username.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id_email" class="required-field">Email</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.email.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id_password1" class="required-field">Mot de passe</label>
+                                {{ form.password1 }}
+                                {% if form.password1.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.password1.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id_password2" class="required-field">Confirmer le mot de passe</label>
+                                {{ form.password2 }}
+                                {% if form.password2.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.password2.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Informations personnelles -->
+                <div class="form-section">
+                    <h3><i class="fas fa-user"></i> Informations personnelles</h3>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id_first_name" class="required-field">Prénom</label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.first_name.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id_last_name" class="required-field">Nom</label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.last_name.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_phone">Téléphone</label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.phone.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Rôle et permissions -->
+                <div class="form-section">
+                    <h3><i class="fas fa-user-shield"></i> Rôle et permissions</h3>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id_role" class="required-field">Rôle</label>
+                                {{ form.role }}
+                                {% if form.role.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.role.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                
+                                <!-- Affichage des rôles disponibles -->
+                                <div class="mt-2">
+                                    <small class="text-muted">Rôles disponibles :</small>
+                                    {% for value, label in role_choices %}
+                                        <span class="role-badge role-{{ value }}">{{ label }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="id_department">Département</label>
+                                {{ form.department }}
+                                {% if form.department.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.department.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Statut et permissions -->
+                <div class="form-section">
+                    <h3><i class="fas fa-cogs"></i> Statut et permissions</h3>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-check form-switch mb-3">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="id_is_active">
+                                    <i class="fas fa-user-check me-2"></i>Utilisateur actif
+                                </label>
+                                <small class="text-muted d-block">L'utilisateur peut se connecter</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="form-check form-switch mb-3">
+                                {{ form.is_staff }}
+                                <label class="form-check-label" for="id_is_staff">
+                                    <i class="fas fa-user-shield me-2"></i>Accès administration
+                                </label>
+                                <small class="text-muted d-block">Accès à l'interface d'administration</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="form-check form-switch mb-3">
+                                {{ form.is_superuser }}
+                                <label class="form-check-label" for="id_is_superuser">
+                                    <i class="fas fa-crown me-2"></i>Super utilisateur
+                                </label>
+                                <small class="text-muted d-block">Toutes les permissions</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Informations sur les permissions -->
+                    <div class="alert alert-info mt-3">
+                        <h6><i class="fas fa-info-circle me-2"></i>Informations sur les permissions :</h6>
+                        <ul class="mb-0">
+                            <li><strong>Actif :</strong> L'utilisateur peut se connecter au système</li>
+                            <li><strong>Staff :</strong> Accès à l'interface d'administration Django</li>
+                            <li><strong>Super utilisateur :</strong> Toutes les permissions sans restriction</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Boutons d'action -->
+                <div class="d-flex justify-content-end mt-4">
+                    <a href="{% url 'users' %}" class="btn btn-secondary me-3">
+                        <i class="fas fa-times"></i> Annuler
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Créer l'Utilisateur
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validation côté client
+    const form = document.querySelector('.needs-validation');
+    form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    });
+    
+    // Validation du mot de passe
+    const password1 = document.getElementById('id_password1');
+    const password2 = document.getElementById('id_password2');
+    
+    function validatePassword() {
+        if (password1.value !== password2.value) {
+            password2.setCustomValidity('Les mots de passe ne correspondent pas');
+        } else {
+            password2.setCustomValidity('');
+        }
+    }
+    
+    password1.addEventListener('change', validatePassword);
+    password2.addEventListener('keyup', validatePassword);
+    
+    // Génération automatique du nom d'utilisateur
+    const firstName = document.getElementById('id_first_name');
+    const lastName = document.getElementById('id_last_name');
+    const username = document.getElementById('id_username');
+    
+    function generateUsername() {
+        if (firstName.value && lastName.value && !username.value) {
+            const firstInitial = firstName.value.charAt(0).toLowerCase();
+            const lastPart = lastName.value.toLowerCase().replace(/\s+/g, '');
+            username.value = firstInitial + lastPart;
+        }
+    }
+    
+    firstName.addEventListener('blur', generateUsername);
+    lastName.addEventListener('blur', generateUsername);
+    
+    // Affichage dynamique des permissions selon le rôle
+    const roleSelect = document.getElementById('id_role');
+    const isStaffCheckbox = document.getElementById('id_is_staff');
+    const isSuperuserCheckbox = document.getElementById('id_is_superuser');
+    
+    function updatePermissions() {
+        const role = roleSelect.value;
+        
+        if (role === 'admin') {
+            isStaffCheckbox.checked = true;
+            isSuperuserCheckbox.checked = true;
+        } else if (role === 'doctor') {
+            isStaffCheckbox.checked = true;
+            isSuperuserCheckbox.checked = false;
+        } else {
+            isStaffCheckbox.checked = false;
+            isSuperuserCheckbox.checked = false;
+        }
+    }
+    
+    roleSelect.addEventListener('change', updatePermissions);
+});
+</script>
+{% endblock %}

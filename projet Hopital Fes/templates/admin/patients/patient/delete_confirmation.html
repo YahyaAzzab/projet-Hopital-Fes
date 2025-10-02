@@ -1,0 +1,181 @@
+{% extends "admin/delete_confirmation.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/css/frontend_admin.css' %}">
+<style>
+/* Styles spécifiques pour la confirmation de suppression */
+.delete-container {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    margin: 2rem;
+    overflow: hidden;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.delete-header {
+    background: linear-gradient(135deg, #e74c3c, #dc3545);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+}
+
+.delete-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.delete-content {
+    padding: 2rem;
+}
+
+.patient-info {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-left: 4px solid #e74c3c;
+}
+
+.patient-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2c5aa0;
+    margin-bottom: 0.5rem;
+}
+
+.patient-details {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+.warning-message {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    color: #856404;
+}
+
+.warning-message h2 {
+    color: #856404;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.warning-message ul {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.warning-message li {
+    margin-bottom: 0.25rem;
+}
+
+.delete-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #e74c3c, #dc3545);
+    color: white;
+}
+
+.btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    background: linear-gradient(135deg, #dc3545, #e74c3c);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .delete-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="delete-container">
+    <div class="delete-header">
+        <h1>⚠️ Confirmation de Suppression</h1>
+    </div>
+    
+    <div class="delete-content">
+        <div class="patient-info">
+            <div class="patient-name">{{ object.get_full_name }}</div>
+            <div class="patient-details">
+                <strong>ID Patient:</strong> {{ object.patient_id }}<br>
+                <strong>Carte d'identité:</strong> {{ object.ci }}<br>
+                <strong>Âge:</strong> {{ object.get_age }} ans<br>
+                <strong>Genre:</strong> {{ object.get_gender_display }}<br>
+                <strong>Statut:</strong> {{ object.get_status_display }}
+            </div>
+        </div>
+        
+        <div class="warning-message">
+            <h2>⚠️ Attention !</h2>
+            <p>Êtes-vous sûr de vouloir supprimer ce patient ? Cette action est irréversible et supprimera :</p>
+            <ul>
+                <li>Le dossier médical complet du patient</li>
+                <li>Tous les documents associés ({{ object.get_documents_count }} document{{ object.get_documents_count|pluralize }})</li>
+                <li>Tous les rapports médicaux ({{ object.get_reports_count }} rapport{{ object.get_reports_count|pluralize }})</li>
+                <li>L'historique des consultations</li>
+            </ul>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="delete-actions">
+                <a href="{% url 'admin:patients_patient_changelist' %}" class="btn btn-secondary">
+                    ← Annuler
+                </a>
+                
+                <button type="submit" class="btn btn-danger">
+                    🗑️ Supprimer Définitivement
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

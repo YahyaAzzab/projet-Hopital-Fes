@@ -1,0 +1,357 @@
+{% extends 'medical/base.html' %}
+{% load static %}
+
+{% block title %}Utilisateurs - Hôpital EL GHASSANI{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-user-cog me-2"></i>Gestion des Utilisateurs
+                </h6>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newUserModal">
+                    <i class="fas fa-plus me-2"></i>Nouvel Utilisateur
+                </button>
+            </div>
+            <div class="card-body">
+                <!-- Search and Filters -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="searchUsers" placeholder="Rechercher un utilisateur...">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="roleFilter">
+                            <option value="">Tous les rôles</option>
+                            <option value="admin">Administrateur</option>
+                            <option value="doctor">Médecin</option>
+                            <option value="nurse">Infirmier</option>
+                            <option value="technician">Technicien</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-secondary w-100" onclick="exportUsers()">
+                            <i class="fas fa-download me-2"></i>Exporter
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Users Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover" id="usersTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Nom</th>
+                                <th>Email</th>
+                                <th>Rôle</th>
+                                <th>Département</th>
+                                <th>Statut</th>
+                                <th>Dernière connexion</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm bg-primary text-white rounded-circle me-2 d-flex align-items-center justify-content-center">
+                                            {{ user.first_name|first }}{{ user.last_name|first }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold">{{ user.get_full_name }}</div>
+                                            <small class="text-muted">@{{ user.username }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ user.email }}</td>
+                                <td>
+                                    <span class="badge bg-{% if user.role == 'admin' %}danger{% elif user.role == 'doctor' %}primary{% elif user.role == 'nurse' %}success{% else %}warning{% endif %}">
+                                        {{ user.get_role_display }}
+                                    </span>
+                                </td>
+                                <td>{{ user.department|default:"-" }}</td>
+                                <td>
+                                    <span class="badge bg-{% if user.is_active %}success{% else %}secondary{% endif %}">
+                                        {% if user.is_active %}Actif{% else %}Inactif{% endif %}
+                                    </span>
+                                </td>
+                                <td>{{ user.last_login|date:"d/m/Y H:i"|default:"Jamais" }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'view_user' user.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'edit_user' user.id %}" class="btn btn-sm btn-outline-warning">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'delete_user' user.id %}" class="btn btn-sm btn-outline-danger" 
+                                           onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-4">
+                                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">Aucun utilisateur trouvé</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nouvel Utilisateur -->
+<div class="modal fade" id="newUserModal" tabindex="-1" aria-labelledby="newUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="newUserModalLabel">
+                    <i class="fas fa-user-plus me-2"></i>Nouvel Utilisateur
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <!-- Informations de connexion -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-primary mb-3"><i class="fas fa-key me-2"></i>Informations de connexion</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Nom d'utilisateur *</label>
+                                <input type="text" class="form-control" name="username" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Email *</label>
+                                <input type="email" class="form-control" name="email" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Mot de passe *</label>
+                                <input type="password" class="form-control" name="password1" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Confirmer mot de passe *</label>
+                                <input type="password" class="form-control" name="password2" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Informations personnelles -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-primary mb-3"><i class="fas fa-user me-2"></i>Informations personnelles</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Prénom *</label>
+                                <input type="text" class="form-control" name="first_name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Nom *</label>
+                                <input type="text" class="form-control" name="last_name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Téléphone</label>
+                                <input type="tel" class="form-control" name="phone">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Rôle et permissions -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-primary mb-3"><i class="fas fa-user-shield me-2"></i>Rôle et permissions</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Rôle *</label>
+                                <select class="form-select" name="role" required>
+                                    <option value="">Sélectionner un rôle</option>
+                                    <option value="admin">👑 Administrateur</option>
+                                    <option value="doctor">👨‍⚕️ Médecin</option>
+                                    <option value="nurse">👩‍⚕️ Infirmier/Infirmière</option>
+                                    <option value="technician">🔬 Technicien</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Département</label>
+                                <input type="text" class="form-control" name="department" placeholder="Ex: Cardiologie, Urgences...">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Statut -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="text-primary mb-3"><i class="fas fa-cogs me-2"></i>Statut et permissions</h6>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="is_active" id="is_active" checked>
+                                <label class="form-check-label" for="is_active">
+                                    Utilisateur actif
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="is_staff" id="is_staff">
+                                <label class="form-check-label" for="is_staff">
+                                    Accès administration
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="is_superuser" id="is_superuser">
+                                <label class="form-check-label" for="is_superuser">
+                                    Super utilisateur
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Lien vers le formulaire complet -->
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Formulaire complet disponible :</strong>
+                        <a href="{% url 'user_add' %}" class="alert-link ms-2">
+                            <i class="fas fa-external-link-alt me-1"></i>Ouvrir le formulaire détaillé
+                        </a>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Annuler
+                    </button>
+                    <a href="{% url 'user_add' %}" class="btn btn-info me-2">
+                        <i class="fas fa-external-link-alt me-2"></i>Formulaire Complet
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Créer Utilisateur
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function viewUser(id) {
+    console.log('View user:', id);
+}
+
+function editUser(id) {
+    console.log('Edit user:', id);
+}
+
+function deleteUser(id) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
+        console.log('Delete user:', id);
+    }
+}
+
+function exportUsers() {
+    console.log('Export users');
+}
+
+// Search functionality
+document.getElementById('searchUsers').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#usersTable tbody tr');
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+});
+
+// Fonctionnalités du modal utilisateur
+document.addEventListener('DOMContentLoaded', function() {
+    // Génération automatique du nom d'utilisateur
+    const firstName = document.querySelector('input[name="first_name"]');
+    const lastName = document.querySelector('input[name="last_name"]');
+    const username = document.querySelector('input[name="username"]');
+    
+    function generateUsername() {
+        if (firstName && lastName && username && !username.value) {
+            const firstInitial = firstName.value.charAt(0).toLowerCase();
+            const lastPart = lastName.value.toLowerCase().replace(/\s+/g, '');
+            username.value = firstInitial + lastPart;
+        }
+    }
+    
+    if (firstName) firstName.addEventListener('blur', generateUsername);
+    if (lastName) lastName.addEventListener('blur', generateUsername);
+    
+    // Validation du mot de passe
+    const password1 = document.querySelector('input[name="password1"]');
+    const password2 = document.querySelector('input[name="password2"]');
+    
+    function validatePassword() {
+        if (password1 && password2 && password1.value !== password2.value) {
+            password2.setCustomValidity('Les mots de passe ne correspondent pas');
+        } else if (password2) {
+            password2.setCustomValidity('');
+        }
+    }
+    
+    if (password1) password1.addEventListener('change', validatePassword);
+    if (password2) password2.addEventListener('keyup', validatePassword);
+    
+    // Mise à jour des permissions selon le rôle
+    const roleSelect = document.querySelector('select[name="role"]');
+    const isStaffCheckbox = document.getElementById('is_staff');
+    const isSuperuserCheckbox = document.getElementById('is_superuser');
+    
+    function updatePermissions() {
+        if (roleSelect && isStaffCheckbox && isSuperuserCheckbox) {
+            const role = roleSelect.value;
+            
+            if (role === 'admin') {
+                isStaffCheckbox.checked = true;
+                isSuperuserCheckbox.checked = true;
+            } else if (role === 'doctor') {
+                isStaffCheckbox.checked = true;
+                isSuperuserCheckbox.checked = false;
+            } else {
+                isStaffCheckbox.checked = false;
+                isSuperuserCheckbox.checked = false;
+            }
+        }
+    }
+    
+    if (roleSelect) roleSelect.addEventListener('change', updatePermissions);
+});
+</script>
+{% endblock %}

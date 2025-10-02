@@ -1,0 +1,319 @@
+{% extends 'medical/base.html' %}
+{% load static %}
+
+{% block title %}Logs Système - Hôpital EL GHASSANI{% endblock %}
+
+{% block extra_css %}
+<style>
+.log-level-INFO { color: #28a745; font-weight: bold; }
+.log-level-WARNING { color: #ffc107; font-weight: bold; }
+.log-level-ERROR { color: #dc3545; font-weight: bold; }
+.log-level-DEBUG { color: #6c757d; font-weight: bold; }
+
+.log-entry {
+    border-left: 4px solid #dee2e6;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 0 8px 8px 0;
+    transition: all 0.3s ease;
+}
+
+.log-entry:hover {
+    background: #e9ecef;
+    transform: translateX(5px);
+}
+
+.log-entry.INFO { border-left-color: #28a745; }
+.log-entry.WARNING { border-left-color: #ffc107; }
+.log-entry.ERROR { border-left-color: #dc3545; }
+.log-entry.DEBUG { border-left-color: #6c757d; }
+
+.log-timestamp {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.log-component {
+    font-weight: 600;
+    color: #495057;
+}
+
+.log-message {
+    margin-top: 0.5rem;
+    color: #212529;
+}
+
+.log-meta {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 0.5rem;
+}
+
+.filter-badge {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-badge:hover {
+    transform: scale(1.05);
+}
+
+.filter-badge.active {
+    background-color: #007bff !important;
+    color: white !important;
+}
+
+.stats-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-clipboard-list me-2"></i>Logs Système
+        </h1>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary" onclick="refreshLogs()">
+                <i class="fas fa-sync-alt me-1"></i>Actualiser
+            </button>
+            <button class="btn btn-outline-success" onclick="exportLogs()">
+                <i class="fas fa-download me-1"></i>Exporter
+            </button>
+        </div>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stats-card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-list fa-2x mb-2"></i>
+                    <h4>{{ total_logs }}</h4>
+                    <p class="mb-0">Total Logs</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card bg-danger text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                    <h4>{{ error_count }}</h4>
+                    <p class="mb-0">Erreurs</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-exclamation-circle fa-2x mb-2"></i>
+                    <h4>{{ warning_count }}</h4>
+                    <p class="mb-0">Avertissements</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-2x mb-2"></i>
+                    <h4>{{ total_logs|add:warning_count|add:error_count|add:-1 }}</h4>
+                    <p class="mb-0">Informations</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-filter me-2"></i>Filtres
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge filter-badge bg-secondary" onclick="filterLogs('all')">Tous</span>
+                        <span class="badge filter-badge bg-success" onclick="filterLogs('INFO')">INFO</span>
+                        <span class="badge filter-badge bg-warning" onclick="filterLogs('WARNING')">WARNING</span>
+                        <span class="badge filter-badge bg-danger" onclick="filterLogs('ERROR')">ERROR</span>
+                        <span class="badge filter-badge bg-secondary" onclick="filterLogs('DEBUG')">DEBUG</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logs -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Journal des événements
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div id="logs-container">
+                        {% for log in logs %}
+                        <div class="log-entry {{ log.level }}" data-level="{{ log.level }}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="log-level-{{ log.level }}">{{ log.level }}</span>
+                                        <span class="log-timestamp">{{ log.timestamp }}</span>
+                                        <span class="log-component">{{ log.component }}</span>
+                                    </div>
+                                    <div class="log-message">{{ log.message }}</div>
+                                    <div class="log-meta">
+                                        <i class="fas fa-user me-1"></i>{{ log.user }} 
+                                        <i class="fas fa-globe me-1 ms-3"></i>{{ log.ip }}
+                                    </div>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#" onclick="viewLogDetails({{ log.id }})">
+                                            <i class="fas fa-eye me-2"></i>Détails
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="copyLogMessage('{{ log.message }}')">
+                                            <i class="fas fa-copy me-2"></i>Copier
+                                        </a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <div class="text-muted">
+                            Affichage de {{ logs|length }} entrées
+                        </div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1">Précédent</a>
+                                </li>
+                                <li class="page-item active">
+                                    <a class="page-link" href="#">1</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">2</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">3</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">Suivant</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Filtrage des logs
+function filterLogs(level) {
+    const logEntries = document.querySelectorAll('.log-entry');
+    const badges = document.querySelectorAll('.filter-badge');
+    
+    // Réinitialiser les badges
+    badges.forEach(badge => badge.classList.remove('active'));
+    
+    // Activer le badge sélectionné
+    event.target.classList.add('active');
+    
+    // Filtrer les entrées
+    logEntries.forEach(entry => {
+        if (level === 'all' || entry.dataset.level === level) {
+            entry.style.display = 'block';
+        } else {
+            entry.style.display = 'none';
+        }
+    });
+}
+
+// Actualiser les logs
+function refreshLogs() {
+    location.reload();
+}
+
+// Exporter les logs
+function exportLogs() {
+    const logs = document.querySelectorAll('.log-entry');
+    let csvContent = 'Timestamp,Level,Component,Message,User,IP\n';
+    
+    logs.forEach(log => {
+        const timestamp = log.querySelector('.log-timestamp').textContent;
+        const level = log.querySelector('.log-level-INFO, .log-level-WARNING, .log-level-ERROR, .log-level-DEBUG').textContent;
+        const component = log.querySelector('.log-component').textContent;
+        const message = log.querySelector('.log-message').textContent;
+        const user = log.querySelector('.log-meta').textContent.split(' ')[1];
+        const ip = log.querySelector('.log-meta').textContent.split(' ')[3];
+        
+        csvContent += `"${timestamp}","${level}","${component}","${message}","${user}","${ip}"\n`;
+    });
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `system_logs_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+// Voir les détails d'un log
+function viewLogDetails(logId) {
+    alert(`Détails du log ID: ${logId}\n\nFonctionnalité en cours de développement.`);
+}
+
+// Copier le message d'un log
+function copyLogMessage(message) {
+    navigator.clipboard.writeText(message).then(() => {
+        // Afficher une notification de succès
+        const notification = document.createElement('div');
+        notification.className = 'alert alert-success alert-dismissible fade show position-fixed';
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999;';
+        notification.innerHTML = `
+            Message copié dans le presse-papiers !
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    });
+}
+
+// Auto-refresh toutes les 30 secondes
+setInterval(() => {
+    // Mise à jour silencieuse des logs
+    console.log('Mise à jour automatique des logs...');
+}, 30000);
+</script>
+{% endblock %}

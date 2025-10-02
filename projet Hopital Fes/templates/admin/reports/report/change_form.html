@@ -1,0 +1,298 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'admin/css/custom_admin.css' %}">
+    <link rel="stylesheet" href="{% static 'admin/css/ai_admin.css' %}">
+    <style>
+        /* Styles spécifiques au formulaire rapport */
+        .report-form-header {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 20px;
+            margin: -20px -20px 20px -20px;
+            border-radius: 0 0 10px 10px;
+        }
+        
+        .report-form-header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .report-form-header .subtitle {
+            margin: 5px 0 0 0;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .medical-info-warning {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .medical-info-warning::before {
+            content: "ℹ️ ";
+            font-size: 16px;
+        }
+        
+        .ai-section {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .ai-section h3 {
+            color: #6f42c1;
+            margin-bottom: 10px;
+        }
+        
+        .required-fields-info {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+        
+        .required-fields-info::before {
+            content: "⚠️ ";
+            font-size: 14px;
+        }
+        
+        .form-row {
+            margin-bottom: 15px;
+        }
+        
+        .form-row .field {
+            margin-bottom: 10px;
+        }
+        
+        /* Amélioration des textarea pour les rapports médicaux */
+        textarea[name="summary"],
+        textarea[name="details"],
+        textarea[name="diagnosis"],
+        textarea[name="treatment"] {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        
+        /* Style pour les champs médicaux */
+        .medical-field {
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        
+        .medical-field label {
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        /* Styles pour les champs IA */
+        .ai-field {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 4px solid #2196f3;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        .ai-field label {
+            color: #1976d2;
+            font-weight: bold;
+        }
+        
+        .ai-status-indicator {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .ai-status-processed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .ai-status-not-processed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .confidence-meter {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #dc3545 0%, #ffc107 50%, #28a745 100%);
+            transition: width 0.3s ease;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {% if not change %}
+        <div class="report-form-header">
+            <h1>📋 Nouveau Rapport Médical</h1>
+            <p class="subtitle">Hôpital EL GHASSANI - Création d'un rapport médical intelligent</p>
+        </div>
+        
+        <div class="medical-info-warning">
+            <strong>Information importante :</strong> Remplissez tous les champs obligatoires pour assurer la qualité des rapports médicaux et l'efficacité du traitement par l'intelligence artificielle.
+        </div>
+        
+        <div class="required-fields-info">
+            <strong>Champs obligatoires :</strong> Titre, Type de rapport, Patient, et Résumé.
+        </div>
+    {% endif %}
+    
+    {{ block.super }}
+    
+    {% if change and original %}
+        <!-- Affichage des informations IA pour les rapports existants -->
+        {% if original.ai_processed %}
+        <div class="ai-field">
+            <h3>🤖 Statut Intelligence Artificielle</h3>
+            <p>
+                <span class="ai-status-indicator ai-status-processed">✅ Traité par IA</span>
+                {% if original.ai_confidence %}
+                    <span style="margin-left: 20px;">Confiance: <strong>{{ original.ai_confidence|floatformat:1 }}%</strong></span>
+                {% endif %}
+            </p>
+            
+            {% if original.ai_confidence %}
+            <div class="confidence-meter">
+                <div class="confidence-fill" style="width: {{ original.ai_confidence }}%"></div>
+            </div>
+            {% endif %}
+            
+            {% if original.ai_recommendations %}
+            <p><strong>Recommandations IA:</strong> {{ original.ai_recommendations|truncatechars:200 }}</p>
+            {% endif %}
+            
+            {% if original.ai_insights %}
+            <p><strong>Insights disponibles:</strong> {{ original.ai_insights|length }} éléments détectés</p>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="ai-field">
+            <h3>🤖 Intelligence Artificielle</h3>
+            <p>
+                <span class="ai-status-indicator ai-status-not-processed">❌ Non traité par IA</span>
+                <button type="button" class="btn btn-sm btn-primary" onclick="processWithAI()" style="margin-left: 20px;">
+                    Traiter avec l'IA
+                </button>
+            </p>
+        </div>
+        {% endif %}
+    {% endif %}
+    
+    {% if change %}
+        <script>
+            // Ajouter des informations sur le rapport existant
+            document.addEventListener('DOMContentLoaded', function() {
+                const header = document.querySelector('.report-form-header');
+                if (!header) {
+                    const title = document.querySelector('h1');
+                    if (title) {
+                        title.innerHTML = '✏️ Modifier le Rapport Médical';
+                    }
+                }
+            });
+        </script>
+    {% endif %}
+    
+    <script>
+        // Amélioration de l'interface utilisateur
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ajouter des classes aux champs médicaux
+            const medicalFields = ['diagnosis', 'treatment', 'medications', 'vital_signs', 'lab_results'];
+            medicalFields.forEach(fieldName => {
+                const field = document.querySelector(`[name="${fieldName}"]`);
+                if (field) {
+                    const wrapper = field.closest('.form-row');
+                    if (wrapper) {
+                        wrapper.classList.add('medical-field');
+                    }
+                }
+            });
+            
+            // Améliorer l'affichage des champs JSON
+            const jsonFields = ['medications', 'vital_signs', 'lab_results'];
+            jsonFields.forEach(fieldName => {
+                const field = document.querySelector(`[name="${fieldName}"]`);
+                if (field && field.tagName === 'TEXTAREA') {
+                    field.placeholder = field.placeholder || 'Format JSON ou texte libre...';
+                }
+            });
+            
+            // Ajouter des classes aux champs IA
+            const aiFields = ['ai_processed', 'ai_confidence', 'ai_recommendations', 'ai_insights'];
+            aiFields.forEach(fieldName => {
+                const field = document.querySelector(`[name="${fieldName}"]`);
+                if (field) {
+                    const wrapper = field.closest('.form-row');
+                    if (wrapper) {
+                        wrapper.classList.add('ai-field');
+                    }
+                }
+            });
+            
+            // Améliorer l'affichage du champ de confiance
+            const confidenceField = document.querySelector('#id_ai_confidence');
+            if (confidenceField) {
+                confidenceField.addEventListener('input', function() {
+                    const value = parseFloat(this.value);
+                    if (value >= 80) {
+                        this.style.background = '#d4edda';
+                        this.style.borderColor = '#28a745';
+                    } else if (value >= 60) {
+                        this.style.background = '#fff3cd';
+                        this.style.borderColor = '#ffc107';
+                    } else if (value > 0) {
+                        this.style.background = '#f8d7da';
+                        this.style.borderColor = '#dc3545';
+                    }
+                });
+            }
+        });
+        
+        // Fonction pour traiter avec l'IA
+        function processWithAI() {
+            if (confirm('Voulez-vous traiter ce rapport avec l\'intelligence artificielle ?')) {
+                // Simulation du traitement IA
+                const confidenceField = document.querySelector('#id_ai_confidence');
+                const processedField = document.querySelector('#id_ai_processed');
+                const recommendationsField = document.querySelector('#id_ai_recommendations');
+                
+                if (confidenceField) confidenceField.value = '85.5';
+                if (processedField) processedField.checked = true;
+                if (recommendationsField) {
+                    recommendationsField.value = 'Rapport traité avec succès par l\'IA. Diagnostic validé avec une confiance élevée.';
+                }
+                
+                alert('Rapport traité avec succès par l\'IA ! N\'oubliez pas de sauvegarder.');
+            }
+        }
+    </script>
+{% endblock %}

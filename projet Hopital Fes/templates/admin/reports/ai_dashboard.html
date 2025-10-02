@@ -1,0 +1,200 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Dashboard IA - Rapports{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .ai-dashboard {
+        padding: 20px;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    
+    .stats-card h3 {
+        font-size: 2.5rem;
+        margin: 0;
+        font-weight: bold;
+    }
+    
+    .stats-card p {
+        margin: 5px 0 0 0;
+        opacity: 0.9;
+    }
+    
+    .ai-insight-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border-left: 4px solid #28a745;
+    }
+    
+    .ai-insight-card h4 {
+        color: #28a745;
+        margin-bottom: 10px;
+    }
+    
+    .confidence-meter {
+        width: 100%;
+        height: 20px;
+        background: #e9ecef;
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 10px 0;
+    }
+    
+    .confidence-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #dc3545 0%, #ffc107 50%, #28a745 100%);
+        transition: width 0.3s ease;
+    }
+    
+    .ai-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .ai-action-btn {
+        background: white;
+        border: 2px solid #007bff;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        text-decoration: none;
+        color: #007bff;
+        transition: all 0.3s ease;
+    }
+    
+    .ai-action-btn:hover {
+        background: #007bff;
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .ai-action-btn i {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        display: block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ai-dashboard">
+    <h1>🤖 Dashboard Intelligence Artificielle - Rapports</h1>
+    
+    <!-- Statistiques principales -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <h3>{{ total_reports }}</h3>
+                <p>📊 Total Rapports</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <h3>{{ ai_processed }}</h3>
+                <p>🤖 Traités par IA</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <h3>{{ avg_confidence|floatformat:1 }}%</h3>
+                <p>🎯 Confiance Moyenne</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <h3>{{ urgent_reports }}</h3>
+                <p>🚨 Rapports Urgents</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Insights IA récents -->
+    <div class="row">
+        <div class="col-md-8">
+            <h2>🧠 Insights IA Récents</h2>
+            {% for report in recent_ai_reports %}
+            <div class="ai-insight-card">
+                <h4>{{ report.title }}</h4>
+                <p><strong>Patient:</strong> {{ report.patient_name|default:"Non spécifié" }}</p>
+                <p><strong>Confiance IA:</strong> {{ report.ai_confidence|floatformat:1 }}%</p>
+                
+                <div class="confidence-meter">
+                    <div class="confidence-fill" style="width: {{ report.ai_confidence }}%"></div>
+                </div>
+                
+                {% if report.ai_recommendations %}
+                <p><strong>Recommandations:</strong> {{ report.ai_recommendations|truncatechars:100 }}</p>
+                {% endif %}
+                
+                {% if report.ai_insights %}
+                <p><strong>Insights:</strong> {{ report.ai_insights|length }} éléments détectés</p>
+                {% endif %}
+                
+                <small class="text-muted">{{ report.created_at|date:"d/m/Y H:i" }}</small>
+            </div>
+            {% empty %}
+            <div class="ai-insight-card">
+                <h4>Aucun rapport IA disponible</h4>
+                <p>Créez des rapports et traitez-les avec l'IA pour voir les insights ici.</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="col-md-4">
+            <h2>⚡ Actions Rapides</h2>
+            <div class="ai-actions">
+                <a href="{% url 'admin:reports_report_changelist' %}?ai_processed__exact=0" class="ai-action-btn">
+                    <i class="fas fa-robot"></i>
+                    Traiter avec IA
+                </a>
+                
+                <a href="{% url 'admin:reports_report_changelist' %}?priority=urgent" class="ai-action-btn">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Rapports Urgents
+                </a>
+                
+                <a href="{% url 'admin:reports_report_changelist' %}?ai_processed__exact=1" class="ai-action-btn">
+                    <i class="fas fa-chart-line"></i>
+                    Voir IA Traités
+                </a>
+                
+                <a href="{% url 'admin:reports_report_add' %}" class="ai-action-btn">
+                    <i class="fas fa-plus"></i>
+                    Nouveau Rapport
+                </a>
+            </div>
+            
+            <!-- Statistiques par type -->
+            <h3 style="margin-top: 30px;">📈 Répartition par Type</h3>
+            {% for type_stat in type_stats %}
+            <div style="margin-bottom: 10px;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>{{ type_stat.type_display }}</span>
+                    <span>{{ type_stat.count }}</span>
+                </div>
+                <div style="width: 100%; height: 8px; background: #e9ecef; border-radius: 4px; margin-top: 5px;">
+                    <div style="width: {{ type_stat.percentage }}%; height: 100%; background: #007bff; border-radius: 4px;"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

@@ -1,0 +1,92 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+    <link rel="stylesheet" href="{% static 'admin/css/custom_admin.css' %}">
+<style>
+        /* Styles spécifiques au formulaire patient */
+        .patient-form-header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 20px;
+            margin: -20px -20px 20px -20px;
+            border-radius: 0 0 10px 10px;
+        }
+        
+        .patient-form-header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .patient-form-header .subtitle {
+            margin: 5px 0 0 0;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .medical-info-warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .medical-info-warning::before {
+            content: "⚠️ ";
+            font-size: 16px;
+        }
+        
+        .required-fields-info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+        
+        .required-fields-info::before {
+            content: "ℹ️ ";
+            font-size: 14px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    {% if not change %}
+        <div class="patient-form-header">
+            <h1>🩺 Nouveau Patient</h1>
+            <p class="subtitle">Hôpital EL GHASSANI - Création d'un nouveau dossier patient</p>
+            </div>
+
+        <div class="medical-info-warning">
+            <strong>Information importante :</strong> Le groupe sanguin est obligatoire pour assurer la sécurité des patients lors des transfusions et interventions médicales.
+                            </div>
+        
+        <div class="required-fields-info">
+            <strong>Champs obligatoires :</strong> Prénom, Nom, Carte d'Identité, Date de naissance, Genre, et Groupe sanguin.
+                                </div>
+    {% endif %}
+    
+    {{ block.super }}
+    
+    {% if change %}
+        <script>
+            // Ajouter des informations sur le patient existant
+            document.addEventListener('DOMContentLoaded', function() {
+                const header = document.querySelector('.patient-form-header');
+                if (!header) {
+                    const title = document.querySelector('h1');
+                    if (title) {
+                        title.innerHTML = '✏️ Modifier le Patient';
+                    }
+                }
+            });
+        </script>
+    {% endif %}
+{% endblock %}

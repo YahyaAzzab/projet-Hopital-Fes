@@ -1,0 +1,275 @@
+{% extends 'medical/base.html' %}
+{% load static %}
+
+{% block title %}Documents - Hôpital EL GHASSANI{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-file-medical me-2"></i>Gestion des Documents
+                </h6>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newDocumentModal">
+                    <i class="fas fa-plus me-2"></i>Nouveau Document
+                </button>
+            </div>
+            <div class="card-body">
+                <!-- Search and Filters -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="searchDocuments" placeholder="Rechercher un document...">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="typeFilter">
+                            <option value="">Tous les types</option>
+                            <option value="radiology">Radiologie</option>
+                            <option value="lab">Laboratoire</option>
+                            <option value="prescription">Ordonnance</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-secondary w-100" onclick="exportDocuments()">
+                            <i class="fas fa-download me-2"></i>Exporter
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Documents Grid -->
+                <div class="row" id="documentsGrid">
+                    {% for document in documents %}
+                    <div class="col-xl-3 col-lg-4 col-md-6 mb-4 document-card">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="card-title">{{ document.title }}</h6>
+                                    <span class="badge bg-{% if document.status == 'processed' %}success{% elif document.status == 'pending' %}warning{% else %}secondary{% endif %}">
+                                        {{ document.get_status_display }}
+                                    </span>
+                                </div>
+                                <p class="card-text text-muted small">
+                                    <i class="fas fa-user me-1"></i>{{ document.patient.get_full_name }}<br>
+                                    <i class="fas fa-calendar me-1"></i>{{ document.document_date|date:"d/m/Y" }}<br>
+                                    <i class="fas fa-tag me-1"></i>{{ document.get_document_type_display }}
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="fas fa-file me-1"></i>{{ document.file_size|filesizeformat|default:"-" }}
+                                    </small>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary" onclick="viewDocument({{ document.id }})">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-outline-warning" onclick="editDocument({{ document.id }})">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger" onclick="deleteDocument({{ document.id }})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center py-5">
+                        <i class="fas fa-file-medical fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Aucun document trouvé</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nouveau Document -->
+<div class="modal fade" id="newDocumentModal" tabindex="-1" aria-labelledby="newDocumentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="newDocumentModalLabel">
+                    <i class="fas fa-upload me-2"></i>Nouveau Document
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newDocumentForm" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row">
+                        <!-- Zone d'Upload -->
+                        <div class="col-md-6">
+                            <div class="upload-zone border border-2 border-dashed rounded p-4 text-center" id="uploadZone">
+                                <div class="upload-placeholder">
+                                    <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                                    <h5>Glissez-déposez vos fichiers ici</h5>
+                                    <p class="text-muted">ou cliquez pour sélectionner</p>
+                                    <input type="file" id="documentFileInput" name="file" class="d-none" multiple 
+                                           accept="image/*,application/pdf,.doc,.docx" required>
+                                    <button type="button" class="btn btn-primary" onclick="document.getElementById('documentFileInput').click()">
+                                        <i class="fas fa-file-medical me-2"></i>Sélectionner Fichiers
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="uploadedFiles" class="uploaded-files mt-3">
+                                <!-- Fichiers uploadés apparaîtront ici -->
+                            </div>
+                        </div>
+
+                        <!-- Formulaire de Métadonnées -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="documentTitle" class="form-label fw-bold">Titre du Document *</label>
+                                <input type="text" class="form-control" id="documentTitle" name="title" required>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="documentType" class="form-label fw-bold">Type *</label>
+                                    <select class="form-select" id="documentType" name="document_type" required>
+                                        <option value="">Sélectionner</option>
+                                        <option value="medical_record">📋 Dossier Médical</option>
+                                        <option value="prescription">💊 Ordonnance</option>
+                                        <option value="lab_results">🧪 Résultats Labo</option>
+                                        <option value="xray">📸 Radiographie</option>
+                                        <option value="consultation">👨‍⚕️ Consultation</option>
+                                        <option value="certificate">📜 Certificat</option>
+                                        <option value="other">📄 Autre</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="documentPatient" class="form-label fw-bold">Patient *</label>
+                                    <select class="form-select" id="documentPatient" name="patient" required>
+                                        <option value="">Sélectionner patient</option>
+                                        {% for patient in patients %}
+                                        <option value="{{ patient.id }}">{{ patient.get_full_name }} ({{ patient.patient_id }})</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="documentDate" class="form-label fw-bold">Date *</label>
+                                    <input type="date" class="form-control" id="documentDate" name="document_date" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="documentPriority" class="form-label fw-bold">Priorité</label>
+                                    <select class="form-select" id="documentPriority" name="priority">
+                                        <option value="low">Faible</option>
+                                        <option value="medium" selected>Moyenne</option>
+                                        <option value="high">Élevée</option>
+                                        <option value="urgent">Urgente</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="documentDescription" class="form-label fw-bold">Description</label>
+                                <textarea class="form-control" id="documentDescription" name="description" rows="3"
+                                          placeholder="Description du document..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Annuler
+                </button>
+                <button type="button" class="btn btn-primary" onclick="saveNewDocument()">
+                    <i class="fas fa-save me-2"></i>Sauvegarder Document
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function viewDocument(id) {
+    window.location.href = `/documents/${id}/`;
+}
+
+function editDocument(id) {
+    window.location.href = `/documents/${id}/edit/`;
+}
+
+function deleteDocument(id) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce document ?')) {
+        window.location.href = `/documents/${id}/delete/`;
+    }
+}
+
+function exportDocuments() {
+    console.log('Export documents');
+}
+
+function saveNewDocument() {
+    const form = document.getElementById('newDocumentForm');
+    const formData = new FormData(form);
+    
+    // Validation
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    // Afficher un indicateur de chargement
+    const saveBtn = document.querySelector('[onclick="saveNewDocument()"]');
+    const originalText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sauvegarde...';
+    saveBtn.disabled = true;
+    
+    // Soumettre le formulaire
+    fetch('{% url "documents" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            // Fermer la modale et recharger la page
+            const modal = bootstrap.Modal.getInstance(document.getElementById('newDocumentModal'));
+            modal.hide();
+            location.reload();
+        } else {
+            throw new Error('Erreur lors de la sauvegarde');
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        alert('Erreur lors de la sauvegarde du document');
+    })
+    .finally(() => {
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
+    });
+}
+
+// Initialiser la date du jour
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('documentDate').value = new Date().toISOString().split('T')[0];
+});
+
+// Search functionality
+document.getElementById('searchDocuments').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    const cards = document.querySelectorAll('.document-card');
+    
+    cards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        card.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+});
+</script>
+{% endblock %}

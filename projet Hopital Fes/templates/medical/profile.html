@@ -1,0 +1,107 @@
+{% extends 'medical/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex align-items-center mb-4">
+    <div class="me-3" style="width:52px;height:52px;border-radius:50%;background: var(--primary-color);display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;">
+      {{ user.first_name|default:user.username|slice:":1"|upper }}
+    </div>
+    <div>
+      <h4 class="mb-0">{{ user.get_full_name|default:user.username }}</h4>
+      <div class="text-muted small">{{ user.email }}</div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h6 class="text-muted mb-3">Informations</h6>
+          <div class="mb-2"><strong>Rôle:</strong> {{ user.role|default:"—" }}</div>
+          <div class="mb-2"><strong>Département:</strong> {{ user.department|default:"—" }}</div>
+          <div class="mb-2"><strong>Statut:</strong> {% if user.is_active %}Actif{% else %}Inactif{% endif %}</div>
+          <div class="mb-2"><strong>Date d'inscription:</strong> {{ user.date_joined|date:'d/m/Y H:i' }}</div>
+          <div class="mb-2"><strong>Dernière connexion:</strong> {{ user.last_login|default:"—"|date:'d/m/Y H:i' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-8">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h6 class="text-muted mb-3">Statistiques personnelles</h6>
+          <div class="row text-center">
+            <div class="col-4">
+              <div class="h4 mb-0">{{ user_stats.patients_created }}</div>
+              <div class="small text-muted">Patients créés</div>
+            </div>
+            <div class="col-4">
+              <div class="h4 mb-0">{{ user_stats.documents_created }}</div>
+              <div class="small text-muted">Documents créés</div>
+            </div>
+            <div class="col-4">
+              <div class="h4 mb-0">{{ user_stats.reports_created }}</div>
+              <div class="small text-muted">Rapports créés</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <h6 class="text-muted mb-3">Patients récents</h6>
+              {% if recent_patients %}
+                <ul class="list-unstyled mb-0">
+                  {% for p in recent_patients %}
+                    <li class="mb-2"><a href="/patients/{{ p.id }}/" class="text-decoration-none">{{ p.get_full_name }}</a><br><span class="small text-muted">{{ p.created_at|date:'d/m/Y H:i' }}</span></li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <div class="text-muted small">Aucune donnée</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <h6 class="text-muted mb-3">Documents récents</h6>
+              {% if recent_documents %}
+                <ul class="list-unstyled mb-0">
+                  {% for d in recent_documents %}
+                    <li class="mb-2"><a href="/documents/{{ d.id }}/" class="text-decoration-none">{{ d.title }}</a><br><span class="small text-muted">{{ d.created_at|date:'d/m/Y H:i' }}</span></li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <div class="text-muted small">Aucune donnée</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <h6 class="text-muted mb-3">Rapports récents</h6>
+              {% if recent_reports %}
+                <ul class="list-unstyled mb-0">
+                  {% for r in recent_reports %}
+                    <li class="mb-2"><a href="/reports/" class="text-decoration-none">{{ r.title }}</a><br><span class="small text-muted">{{ r.created_at|date:'d/m/Y H:i' }}</span></li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <div class="text-muted small">Aucune donnée</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+

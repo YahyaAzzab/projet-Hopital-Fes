@@ -1,0 +1,230 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static admin_urls %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .admin-page {
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        margin: 20px;
+    }
+    
+    .page-header {
+        background: var(--gradient-medical);
+        color: white;
+        padding: 30px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="medical-pattern" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/><path d="M50 30v40M30 50h40" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23medical-pattern)"/></svg>');
+        opacity: 0.3;
+    }
+    
+    .page-header h1 {
+        margin: 0;
+        font-size: 32px;
+        font-weight: 700;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .results {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid #e2e8f0;
+    }
+    
+    .results table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .results th {
+        background: var(--gradient-medical);
+        color: white;
+        padding: 20px 15px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 14px;
+    }
+    
+    .results td {
+        padding: 18px 15px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 14px;
+    }
+    
+    .results tr:hover {
+        background: #f8fafc;
+    }
+    
+    .results a {
+        color: var(--medical-blue);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+    
+    .results a:hover {
+        color: var(--medical-green);
+        text-decoration: underline;
+    }
+    
+    .addlink {
+        background: var(--gradient-success);
+        color: white !important;
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        margin: 20px 0;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-md);
+    }
+    
+    .addlink:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+        color: white !important;
+    }
+    
+    .addlink::before {
+        content: '+ ';
+        font-weight: bold;
+    }
+    
+    .actions {
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .actions select {
+        padding: 10px 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 14px;
+        margin-right: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .actions select:focus {
+        outline: none;
+        border-color: var(--medical-blue);
+        box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    }
+    
+    .actions input[type="submit"] {
+        background: var(--gradient-warning);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .actions input[type="submit"]:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-page">
+    <div class="page-header">
+        <h1>{% if cl.opts.verbose_name_plural %}{{ cl.opts.verbose_name_plural|capfirst }}{% else %}{{ cl.opts.verbose_name|capfirst }}{% endif %}</h1>
+    </div>
+    
+    {% if cl.has_add_permission %}
+        <a href="{% url cl.opts|admin_urlname:'add' %}{% if is_popup %}?_popup=1{% endif %}" class="addlink">
+            Ajouter {{ cl.opts.verbose_name }}
+        </a>
+    {% endif %}
+    
+    {% if cl.formset and cl.formset.errors %}
+        <div class="alert alert-danger">
+            {% for error in cl.formset.errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    {% if cl.formset %}
+        <form id="changelist-form" method="post" novalidate>
+            {% csrf_token %}
+            <div class="actions">
+                <label>Action :</label>
+                <select name="action" required>
+                    <option value="">---------</option>
+                    {% for action in cl.action_form.fields.action.choices %}
+                        <option value="{{ action.0 }}">{{ action.1 }}</option>
+                    {% endfor %}
+                </select>
+                <input type="submit" value="Exécuter">
+            </div>
+    {% endif %}
+    
+    <div class="results">
+        {% if cl.result_count %}
+            <table id="result_list">
+                <thead>
+                    <tr>
+                        {% for header in cl.result_headers %}
+                            <th scope="col" class="{% if header.sortable %}sortable{% endif %}">
+                                {% if header.sortable %}
+                                    <a href="{{ header.url_primary }}">{{ header.text|capfirst }}</a>
+                                {% else %}
+                                    {{ header.text|capfirst }}
+                                {% endif %}
+                            </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in cl.result_list %}
+                        <tr class="{% cycle 'row1' 'row2' %}">
+                            {% for item in result %}
+                                <td>{{ item }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="text-center p-5">
+                <h3>Aucun {{ cl.opts.verbose_name }} trouvé</h3>
+                <p>Commencez par ajouter un {{ cl.opts.verbose_name }}.</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    {% if cl.formset %}
+        </form>
+    {% endif %}
+</div>
+{% endblock %}

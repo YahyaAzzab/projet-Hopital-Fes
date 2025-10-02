@@ -1,0 +1,212 @@
+{% extends 'medical/base.html' %}
+{% load static %}
+
+{% block title %}Notifications - Hôpital EL GHASSANI{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body bg-gradient-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-0">
+                                <i class="fas fa-bell me-2"></i>Notifications
+                            </h4>
+                            <p class="mb-0 opacity-75">{{ unread_count }} notification(s) non lue(s)</p>
+                        </div>
+                        <a href="{% url 'messages' %}" class="btn btn-light">
+                            <i class="fas fa-envelope me-2"></i>Messages
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-bell fa-2x text-warning mb-2"></i>
+                    <h5 class="mb-1">{{ unread_count }}</h5>
+                    <p class="text-muted mb-0">Non lues</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                    <h5 class="mb-1">{{ notifications.paginator.count|add:"-"|add:unread_count }}</h5>
+                    <p class="text-muted mb-0">Lues</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-list fa-2x text-info mb-2"></i>
+                    <h5 class="mb-1">{{ notifications.paginator.count }}</h5>
+                    <p class="text-muted mb-0">Total</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des notifications -->
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">
+                            <i class="fas fa-list me-2"></i>Toutes les notifications
+                        </h6>
+                        {% if unread_count > 0 %}
+                        <button class="btn btn-sm btn-primary" onclick="markAllAsRead()">
+                            <i class="fas fa-check-double me-2"></i>Tout marquer comme lu
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    {% for notification in notifications %}
+                    <div class="border-bottom p-3 {% if not notification.is_read %}bg-light{% endif %}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center mb-2">
+                                    {% if notification.notification_type == 'message' %}
+                                    <i class="fas fa-envelope text-primary me-2"></i>
+                                    {% elif notification.notification_type == 'system' %}
+                                    <i class="fas fa-cog text-info me-2"></i>
+                                    {% elif notification.notification_type == 'reminder' %}
+                                    <i class="fas fa-clock text-warning me-2"></i>
+                                    {% elif notification.notification_type == 'alert' %}
+                                    <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                                    {% else %}
+                                    <i class="fas fa-bell text-secondary me-2"></i>
+                                    {% endif %}
+                                    
+                                    <h6 class="mb-0 me-2">
+                                        {% if not notification.is_read %}
+                                        <strong>{{ notification.title }}</strong>
+                                        {% else %}
+                                        {{ notification.title }}
+                                        {% endif %}
+                                    </h6>
+                                    
+                                    {% if not notification.is_read %}
+                                    <span class="badge bg-primary">Nouveau</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <p class="text-muted mb-2">
+                                    {{ notification.message }}
+                                </p>
+                                
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>{{ notification.created_at|date:"d/m/Y à H:i" }}
+                                    <span class="ms-3">
+                                        <i class="fas fa-tag me-1"></i>{{ notification.get_notification_type_display }}
+                                    </span>
+                                </small>
+                            </div>
+                            
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    {% if not notification.is_read %}
+                                    <li><a class="dropdown-item" href="{% url 'mark_notification_read' notification.id %}">
+                                        <i class="fas fa-eye me-2"></i>Marquer comme lu
+                                    </a></li>
+                                    {% endif %}
+                                    {% if notification.message_link %}
+                                    <li><a class="dropdown-item" href="{% url 'message_detail' notification.message_link.id %}">
+                                        <i class="fas fa-external-link-alt me-2"></i>Voir le message
+                                    </a></li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center p-4">
+                        <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Aucune notification</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% if notifications.has_other_pages %}
+                <div class="card-footer">
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0 justify-content-center">
+                            {% if notifications.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ notifications.previous_page_number }}">Précédent</a>
+                            </li>
+                            {% endif %}
+                            
+                            <li class="page-item active">
+                                <span class="page-link">{{ notifications.number }} / {{ notifications.paginator.num_pages }}</span>
+                            </li>
+                            
+                            {% if notifications.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ notifications.next_page_number }}">Suivant</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function markAllAsRead() {
+    // Marquer toutes les notifications comme lues
+    const unreadNotifications = document.querySelectorAll('.bg-light');
+    
+    unreadNotifications.forEach(notification => {
+        const markReadLink = notification.querySelector('a[href*="mark_notification_read"]');
+        if (markReadLink) {
+            fetch(markReadLink.href, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+        }
+    });
+    
+    // Recharger la page après un court délai
+    setTimeout(() => {
+        location.reload();
+    }, 1000);
+}
+
+// Auto-refresh des notifications toutes les 30 secondes
+setInterval(() => {
+    fetch('/communication/api/get-messages/')
+        .then(response => response.json())
+        .then(data => {
+            const unreadCountElement = document.querySelector('.opacity-75');
+            if (unreadCountElement) {
+                unreadCountElement.textContent = `${data.unread_notifications_count} notification(s) non lue(s)`;
+            }
+        })
+        .catch(error => console.error('Erreur:', error));
+}, 30000);
+</script>
+{% endblock %}

@@ -1,0 +1,430 @@
+{% extends 'medical/base.html' %}
+{% load static %}
+
+{% block title %}{{ document.title }} - Hôpital EL GHASSANI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .document-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .document-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .document-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .document-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.9;
+    }
+
+    .document-title {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .document-meta {
+        font-size: 1rem;
+        opacity: 0.8;
+    }
+
+    .info-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #333;
+        min-width: 150px;
+    }
+
+    .info-value {
+        color: #666;
+        text-align: right;
+    }
+
+    .badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .badge-success {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .badge-warning {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .badge-danger {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .badge-info {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .document-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+    }
+
+    .btn-document {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        color: white;
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        color: white;
+    }
+
+    .btn-warning:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+        color: white;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        color: white;
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+        color: white;
+    }
+
+    .file-preview {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        text-align: center;
+    }
+
+    .file-preview img {
+        max-width: 100%;
+        max-height: 500px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .file-info {
+        margin-top: 1rem;
+        color: #666;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header du document -->
+    <div class="document-header">
+        <div class="document-content">
+            <div class="document-icon">
+                {% if document.document_type == 'prescription' %}
+                    <i class="fas fa-prescription-bottle-alt"></i>
+                {% elif document.document_type == 'lab_result' %}
+                    <i class="fas fa-flask"></i>
+                {% elif document.document_type == 'radiology' %}
+                    <i class="fas fa-x-ray"></i>
+                {% elif document.document_type == 'consultation' %}
+                    <i class="fas fa-stethoscope"></i>
+                {% elif document.document_type == 'surgery' %}
+                    <i class="fas fa-procedures"></i>
+                {% elif document.document_type == 'emergency' %}
+                    <i class="fas fa-ambulance"></i>
+                {% elif document.document_type == 'discharge' %}
+                    <i class="fas fa-sign-out-alt"></i>
+                {% elif document.document_type == 'certificate' %}
+                    <i class="fas fa-certificate"></i>
+                {% else %}
+                    <i class="fas fa-file-alt"></i>
+                {% endif %}
+            </div>
+            <div class="document-title">{{ document.title }}</div>
+            <div class="document-meta">
+                {{ document.get_document_type_display }} • 
+                Créé le {{ document.created_at|date:"d/m/Y à H:i" }}
+                {% if document.created_by %}
+                    par {{ document.created_by.get_full_name }}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Informations du document -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="info-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-info-circle me-2"></i>Informations du document
+                </h5>
+                
+                <div class="info-item">
+                    <span class="info-label">Titre :</span>
+                    <span class="info-value">{{ document.title }}</span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">Type :</span>
+                    <span class="info-value">{{ document.get_document_type_display }}</span>
+                </div>
+                
+                {% if document.patient %}
+                <div class="info-item">
+                    <span class="info-label">Patient :</span>
+                    <span class="info-value">
+                        <a href="{% url 'view_patient' document.patient.id %}" class="text-decoration-none">
+                            {{ document.patient.get_full_name }}
+                        </a>
+                    </span>
+                </div>
+                {% endif %}
+                
+                <div class="info-item">
+                    <span class="info-label">Priorité :</span>
+                    <span class="info-value">
+                        <span class="badge 
+                            {% if document.priority == 'urgent' %}badge-danger
+                            {% elif document.priority == 'high' %}badge-warning
+                            {% elif document.priority == 'normal' %}badge-success
+                            {% else %}badge-info{% endif %}">
+                            {{ document.get_priority_display }}
+                        </span>
+                    </span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">Statut :</span>
+                    <span class="info-value">
+                        <span class="badge 
+                            {% if document.status == 'completed' %}badge-success
+                            {% elif document.status == 'processing' %}badge-warning
+                            {% elif document.status == 'error' %}badge-danger
+                            {% else %}badge-info{% endif %}">
+                            {{ document.get_status_display }}
+                        </span>
+                    </span>
+                </div>
+                
+                {% if document.doctor %}
+                <div class="info-item">
+                    <span class="info-label">Médecin :</span>
+                    <span class="info-value">{{ document.doctor.get_full_name }}</span>
+                </div>
+                {% endif %}
+                
+                <div class="info-item">
+                    <span class="info-label">Date du document :</span>
+                    <span class="info-value">{{ document.document_date|date:"d/m/Y à H:i" }}</span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">Créé le :</span>
+                    <span class="info-value">{{ document.created_at|date:"d/m/Y à H:i" }}</span>
+                </div>
+                
+                {% if document.description %}
+                <div class="info-item">
+                    <span class="info-label">Description :</span>
+                    <span class="info-value">{{ document.description }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Aperçu du fichier -->
+            {% if document.file %}
+            <div class="file-preview">
+                <h5 class="mb-3">
+                    <i class="fas fa-eye me-2"></i>Aperçu du document
+                </h5>
+                
+                {% if document.file_type == 'application/pdf' %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-file-pdf me-2"></i>
+                        Fichier PDF - <a href="{{ document.file.url }}" target="_blank" class="text-decoration-none">Ouvrir dans un nouvel onglet</a>
+                    </div>
+                {% elif document.file_type and 'image' in document.file_type %}
+                    <img src="{{ document.file.url }}" alt="Aperçu du document" class="img-fluid">
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-file me-2"></i>
+                        Fichier {{ document.file_type|default:"inconnu" }} - 
+                        <a href="{{ document.file.url }}" target="_blank" class="text-decoration-none">Télécharger</a>
+                    </div>
+                {% endif %}
+                
+                <div class="file-info">
+                    <small>
+                        <strong>Taille :</strong> {{ document.get_file_size_display }} • 
+                        <strong>Type :</strong> {{ document.file_type|default:"Inconnu" }}
+                    </small>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Actions -->
+        <div class="col-lg-4">
+            <div class="info-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-cogs me-2"></i>Actions
+                </h5>
+                
+                <div class="document-actions">
+                    <a href="{% url 'edit_document' document.id %}" class="btn-document btn-warning">
+                        <i class="fas fa-edit"></i>
+                        Modifier
+                    </a>
+                    
+                    {% if user.role != 'nurse' %}
+                    <a href="{% url 'delete_document' document.id %}" class="btn-document btn-danger">
+                        <i class="fas fa-trash"></i>
+                        Supprimer
+                    </a>
+                    {% endif %}
+                    
+                    {% if document.file %}
+                    <a href="{{ document.file.url }}" target="_blank" class="btn-document btn-primary">
+                        <i class="fas fa-download"></i>
+                        Télécharger
+                    </a>
+                    {% endif %}
+                    
+                    <a href="{% url 'documents' %}" class="btn-document btn-secondary">
+                        <i class="fas fa-arrow-left"></i>
+                        Retour à la liste
+                    </a>
+                </div>
+            </div>
+
+            <!-- Métadonnées techniques -->
+            <div class="info-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-cog me-2"></i>Métadonnées
+                </h5>
+                
+                <div class="info-item">
+                    <span class="info-label">ID :</span>
+                    <span class="info-value">#{{ document.id }}</span>
+                </div>
+                
+                {% if document.file_size %}
+                <div class="info-item">
+                    <span class="info-label">Taille :</span>
+                    <span class="info-value">{{ document.get_file_size_display }}</span>
+                </div>
+                {% endif %}
+                
+                {% if document.quality_score %}
+                <div class="info-item">
+                    <span class="info-label">Qualité :</span>
+                    <span class="info-value">{{ document.get_quality_display }}</span>
+                </div>
+                {% endif %}
+                
+                {% if document.ai_processed %}
+                <div class="info-item">
+                    <span class="info-label">IA :</span>
+                    <span class="info-value">
+                        <span class="badge badge-success">Traité</span>
+                        {% if document.ai_confidence %}
+                            ({{ document.ai_confidence }}%)
+                        {% endif %}
+                    </span>
+                </div>
+                {% endif %}
+                
+                <div class="info-item">
+                    <span class="info-label">Modifié le :</span>
+                    <span class="info-value">{{ document.updated_at|date:"d/m/Y à H:i" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

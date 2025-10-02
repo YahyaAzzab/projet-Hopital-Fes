@@ -1,0 +1,1122 @@
+{% extends 'medical/base.html' %}
+{% load static %}
+
+{% block title %}Paramètres - Hôpital EL GHASSANI{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-cog me-2"></i>
+                    {% if user_role == 'technician' %}Paramètres Système - Technicien
+                    {% else %}Paramètres de la Plateforme{% endif %}
+                </h6>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Section spéciale pour Technicien -->
+                    {% if user_role == 'technician' %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <h5><i class="fas fa-info-circle me-2"></i>Accès Technicien</h5>
+                                <p class="mb-0">En tant que technicien, vous avez accès aux paramètres système pour la maintenance et la configuration de la plateforme.</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Informations générales -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-hospital me-2"></i>Informations Générales
+                            </h5>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Nom de l'hôpital</label>
+                                <input type="text" class="form-control" name="hospital_name" value="Hôpital EL GHASSANI">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" name="hospital_email" value="contact@elghassani.ma">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Téléphone</label>
+                                <input type="tel" class="form-control" name="hospital_phone" value="+212 5 35 12 34 56">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Adresse</label>
+                                <input type="text" class="form-control" name="hospital_address" value="Fès, Maroc">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configuration de l'application -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-cogs me-2"></i>Configuration de l'Application
+                            </h5>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Langue par défaut</label>
+                                <select class="form-select" name="default_language" id="language-select">
+                                    <option value="fr" selected>🇫🇷 Français</option>
+                                    <option value="ar">🇲🇦 العربية</option>
+                                </select>
+                                <small class="text-muted">La langue sera appliquée à l'interface</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Thème</label>
+                                <select class="form-select" name="theme" id="theme-select">
+                                    <option value="light">☀️ Clair</option>
+                                    <option value="dark">🌙 Sombre</option>
+                                    <option value="auto" selected>⚙️ Automatique</option>
+                                </select>
+                                <small class="text-muted">Thème d'affichage de l'interface</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Format de date</label>
+                                <select class="form-select" name="date_format">
+                                    <option value="dd/mm/yyyy" selected>DD/MM/YYYY (31/12/2025)</option>
+                                    <option value="mm/dd/yyyy">MM/DD/YYYY (12/31/2025)</option>
+                                    <option value="yyyy-mm-dd">YYYY-MM-DD (2025-12-31)</option>
+                                    <option value="dd-mm-yyyy">DD-MM-YYYY (31-12-2025)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Format d'heure</label>
+                                <select class="form-select" name="time_format">
+                                    <option value="24h" selected>Format 24h (14:30)</option>
+                                    <option value="12h">Format 12h (2:30 PM)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Fuseau horaire</label>
+                                <select class="form-select" name="timezone">
+                                    <option value="Africa/Casablanca" selected>🇲🇦 Casablanca (GMT+1)</option>
+                                    <option value="Europe/Paris">🇫🇷 Paris (GMT+1)</option>
+                                    <option value="America/New_York">🇺🇸 New York (GMT-5)</option>
+                                    <option value="Europe/London">🇬🇧 London (GMT+0)</option>
+                                    <option value="Asia/Dubai">🇦🇪 Dubai (GMT+4)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Devise par défaut</label>
+                                <select class="form-select" name="currency">
+                                    <option value="MAD" selected>🇲🇦 Dirham Marocain (MAD)</option>
+                                    <option value="EUR">🇪🇺 Euro (EUR)</option>
+                                    <option value="USD">🇺🇸 Dollar US (USD)</option>
+                                    <option value="GBP">🇬🇧 Livre Sterling (GBP)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Taille maximale des fichiers (MB)</label>
+                                <input type="number" class="form-control" name="max_file_size" value="10" min="1" max="100">
+                                <small class="text-muted">Taille maximale pour les uploads</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Types de fichiers autorisés</label>
+                                <input type="text" class="form-control" name="allowed_file_types" value="pdf,jpg,jpeg,png,doc,docx,xlsx">
+                                <small class="text-muted">Extensions séparées par des virgules</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interface utilisateur -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-desktop me-2"></i>Interface Utilisateur
+                            </h5>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Nombre d'éléments par page</label>
+                                <select class="form-select" name="items_per_page">
+                                    <option value="10">10 éléments</option>
+                                    <option value="25" selected>25 éléments</option>
+                                    <option value="50">50 éléments</option>
+                                    <option value="100">100 éléments</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Densité d'affichage</label>
+                                <select class="form-select" name="display_density">
+                                    <option value="compact">Compact</option>
+                                    <option value="normal" selected>Normal</option>
+                                    <option value="comfortable">Confortable</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Animation des transitions</label>
+                                <select class="form-select" name="animations">
+                                    <option value="fast">Rapide</option>
+                                    <option value="normal" selected>Normal</option>
+                                    <option value="slow">Lent</option>
+                                    <option value="disabled">Désactivé</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Taille de police</label>
+                                <select class="form-select" name="font_size">
+                                    <option value="small">Petite</option>
+                                    <option value="medium" selected>Moyenne</option>
+                                    <option value="large">Grande</option>
+                                    <option value="extra-large">Très grande</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="sidebar_collapsed" id="sidebar_collapsed">
+                                <label class="form-check-label" for="sidebar_collapsed">
+                                    Sidebar réduite par défaut
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="breadcrumbs_enabled" checked id="breadcrumbs_enabled">
+                                <label class="form-check-label" for="breadcrumbs_enabled">
+                                    Fil d'Ariane activé
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notifications -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-bell me-2"></i>Notifications
+                            </h5>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="email_notifications" checked id="email_notifications">
+                                <label class="form-check-label" for="email_notifications">
+                                    <i class="fas fa-envelope me-1"></i>Notifications par email
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="sms_notifications" id="sms_notifications">
+                                <label class="form-check-label" for="sms_notifications">
+                                    <i class="fas fa-sms me-1"></i>Notifications par SMS
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="notification_sound" checked id="notification_sound">
+                                <label class="form-check-label" for="notification_sound">
+                                    <i class="fas fa-volume-up me-1"></i>Son des notifications
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Types de notifications</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="notif_patients" checked id="notif_patients">
+                                    <label class="form-check-label" for="notif_patients">
+                                        Nouveaux patients
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="notif_reports" checked id="notif_reports">
+                                    <label class="form-check-label" for="notif_reports">
+                                        Nouveaux rapports
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="notif_appointments" id="notif_appointments">
+                                    <label class="form-check-label" for="notif_appointments">
+                                        Rendez-vous
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="notif_urgent" checked id="notif_urgent">
+                                    <label class="form-check-label" for="notif_urgent">
+                                        Cas urgents
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Fréquence des rappels</label>
+                                <select class="form-select" name="reminder_frequency">
+                                    <option value="immediate">Immédiat</option>
+                                    <option value="5min">5 minutes</option>
+                                    <option value="15min" selected>15 minutes</option>
+                                    <option value="30min">30 minutes</option>
+                                    <option value="1hour">1 heure</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Communication -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-comments me-2"></i>Communication
+                            </h5>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Serveur SMTP</label>
+                                <input type="text" class="form-control" name="smtp_server" value="smtp.gmail.com" placeholder="smtp.gmail.com">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Port SMTP</label>
+                                <input type="number" class="form-control" name="smtp_port" value="587" placeholder="587">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Email d'envoi</label>
+                                <input type="email" class="form-control" name="sender_email" value="noreply@elghassani.ma">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Nom d'expéditeur</label>
+                                <input type="text" class="form-control" name="sender_name" value="Hôpital EL GHASSANI">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="smtp_ssl" checked id="smtp_ssl">
+                                <label class="form-check-label" for="smtp_ssl">
+                                    Utiliser SSL/TLS
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Fournisseur SMS</label>
+                                <select class="form-select" name="sms_provider">
+                                    <option value="twilio">Twilio</option>
+                                    <option value="nexmo">Vonage (Nexmo)</option>
+                                    <option value="custom">Personnalisé</option>
+                                    <option value="none" selected>Aucun</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Intégrations -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-plug me-2"></i>Intégrations
+                            </h5>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="google_analytics" id="google_analytics">
+                                <label class="form-check-label" for="google_analytics">
+                                    <i class="fab fa-google me-1"></i>Google Analytics
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="facebook_pixel" id="facebook_pixel">
+                                <label class="form-check-label" for="facebook_pixel">
+                                    <i class="fab fa-facebook me-1"></i>Facebook Pixel
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Clé API Google Maps</label>
+                                <input type="text" class="form-control" name="google_maps_key" placeholder="AIzaSy...">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Token d'accès API</label>
+                                <input type="password" class="form-control" name="api_token" placeholder="Token d'API">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sécurité -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-shield-alt me-2"></i>Sécurité
+                            </h5>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Délai d'expiration de session (heures)</label>
+                                <input type="number" class="form-control" name="session_timeout" value="1">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Tentatives de connexion max</label>
+                                <input type="number" class="form-control" name="max_login_attempts" value="5">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Longueur min du mot de passe</label>
+                                <input type="number" class="form-control" name="password_min_length" value="8">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sauvegarde -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-database me-2"></i>Sauvegarde
+                            </h5>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Fréquence de sauvegarde</label>
+                                <select class="form-select" name="backup_frequency">
+                                    <option value="hourly">Horaire</option>
+                                    <option value="daily" selected>Quotidien</option>
+                                    <option value="weekly">Hebdomadaire</option>
+                                    <option value="monthly">Mensuel</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Rétention des sauvegardes (jours)</label>
+                                <input type="number" class="form-control" name="backup_retention_days" value="30">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mode maintenance -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-tools me-2"></i>Maintenance
+                            </h5>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="maintenance_mode">
+                                <label class="form-check-label text-warning">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    Mode maintenance (désactive l'accès public)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Boutons d'action -->
+                    <div class="row">
+                        <div class="col-12 text-end">
+                            <button type="button" class="btn btn-secondary me-2" onclick="resetSettings()">
+                                <i class="fas fa-undo me-2"></i>Réinitialiser
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="saveSettings()">
+                                <i class="fas fa-save me-2"></i>Sauvegarder
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Fonction pour réinitialiser les paramètres
+function resetSettings() {
+    if (confirm('Êtes-vous sûr de vouloir réinitialiser tous les paramètres ?')) {
+        location.reload();
+    }
+}
+
+// Fonction pour changer le thème en temps réel
+function changeTheme(theme) {
+    const body = document.body;
+    const html = document.documentElement;
+    
+    // Supprimer les classes de thème existantes
+    body.classList.remove('light-theme', 'dark-theme');
+    html.classList.remove('light-theme', 'dark-theme');
+    
+    // Appliquer le nouveau thème
+    if (theme === 'dark') {
+        body.classList.add('dark-theme');
+        html.classList.add('dark-theme');
+        localStorage.setItem('theme', 'dark');
+    } else if (theme === 'light') {
+        body.classList.add('light-theme');
+        html.classList.add('light-theme');
+        localStorage.setItem('theme', 'light');
+    } else if (theme === 'auto') {
+        // Mode automatique basé sur les préférences système
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            body.classList.add('dark-theme');
+            html.classList.add('dark-theme');
+        } else {
+            body.classList.add('light-theme');
+            html.classList.add('light-theme');
+        }
+        localStorage.setItem('theme', 'auto');
+    }
+    
+    // Mettre à jour l'icône du bouton de thème dans la navbar si elle existe
+    updateThemeIcon(theme);
+}
+
+// Fonction pour mettre à jour l'icône du thème
+function updateThemeIcon(theme) {
+    const themeIcon = document.getElementById('theme-icon');
+    if (themeIcon) {
+        if (theme === 'dark') {
+            themeIcon.className = 'fas fa-moon';
+        } else if (theme === 'light') {
+            themeIcon.className = 'fas fa-sun';
+        } else {
+            themeIcon.className = 'fas fa-adjust';
+        }
+    }
+}
+
+// Écouter les changements du sélecteur de thème
+document.addEventListener('DOMContentLoaded', function() {
+    const themeSelect = document.querySelector('select[name="theme"]');
+    if (themeSelect) {
+        // Charger le thème sauvegardé
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        themeSelect.value = savedTheme;
+        changeTheme(savedTheme);
+        
+        // Écouter les changements
+        themeSelect.addEventListener('change', function() {
+            changeTheme(this.value);
+        });
+    }
+    
+    // Charger les paramètres sauvegardés
+    loadSettings();
+    
+    // Écouter les changements de préférences système pour le mode auto
+    if (window.matchMedia) {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+            const currentTheme = localStorage.getItem('theme');
+            if (currentTheme === 'auto') {
+                changeTheme('auto');
+            }
+        });
+    }
+    
+    // Écouter les changements de langue
+    const languageSelect = document.getElementById('language-select');
+    if (languageSelect) {
+        languageSelect.addEventListener('change', function() {
+            applyLanguage(this.value);
+            showNotification(`Langue changée vers ${this.options[this.selectedIndex].text}`, 'info');
+        });
+    }
+    
+    // Écouter les changements de taille de police
+    const fontSizeSelect = document.querySelector('select[name="font_size"]');
+    if (fontSizeSelect) {
+        fontSizeSelect.addEventListener('change', function() {
+            applyFontSize(this.value);
+        });
+    }
+    
+    // Écouter les changements de densité d'affichage
+    const densitySelect = document.querySelector('select[name="display_density"]');
+    if (densitySelect) {
+        densitySelect.addEventListener('change', function() {
+            applyDisplayDensity(this.value);
+        });
+    }
+    
+    // Écouter les changements d'animations
+    const animationsSelect = document.querySelector('select[name="animations"]');
+    if (animationsSelect) {
+        animationsSelect.addEventListener('change', function() {
+            applyAnimations(this.value);
+        });
+    }
+});
+
+// Fonction pour sauvegarder les paramètres
+function saveSettings() {
+    const form = document.querySelector('form');
+    const formData = new FormData(form);
+    
+    // Créer un objet pour stocker tous les paramètres
+    const settings = {};
+    
+    // Collecter tous les paramètres
+    for (let [key, value] of formData.entries()) {
+        settings[key] = value;
+    }
+    
+    // Sauvegarder dans localStorage
+    localStorage.setItem('app_settings', JSON.stringify(settings));
+    
+    // Appliquer les paramètres immédiatement
+    applySettings(settings);
+    
+    // Afficher un message de succès
+    showNotification('Paramètres sauvegardés avec succès!', 'success');
+    
+    console.log('Paramètres sauvegardés:', settings);
+}
+
+// Fonction pour appliquer les paramètres
+function applySettings(settings) {
+    // Appliquer le thème
+    if (settings.theme) {
+        changeTheme(settings.theme);
+    }
+    
+    // Appliquer la langue
+    if (settings.default_language) {
+        applyLanguage(settings.default_language);
+    }
+    
+    // Appliquer la taille de police
+    if (settings.font_size) {
+        applyFontSize(settings.font_size);
+    }
+    
+    // Appliquer la densité d'affichage
+    if (settings.display_density) {
+        applyDisplayDensity(settings.display_density);
+    }
+    
+    // Appliquer les animations
+    if (settings.animations) {
+        applyAnimations(settings.animations);
+    }
+}
+
+// Fonction pour appliquer la langue
+function applyLanguage(language) {
+    console.log('Langue changée vers:', language);
+    
+    const body = document.body;
+    const html = document.documentElement;
+    
+    // Supprimer les classes de langue précédentes
+    body.classList.remove('lang-fr', 'lang-ar', 'rtl');
+    html.classList.remove('lang-fr', 'lang-ar', 'rtl');
+    
+    // Ajouter la nouvelle classe de langue
+    body.classList.add(`lang-${language}`);
+    html.classList.add(`lang-${language}`);
+    
+    // Appliquer RTL pour l'arabe
+    if (language === 'ar') {
+        body.classList.add('rtl');
+        html.classList.add('rtl');
+        html.setAttribute('dir', 'rtl');
+        html.setAttribute('lang', 'ar');
+    } else {
+        html.setAttribute('dir', 'ltr');
+        html.setAttribute('lang', 'fr');
+    }
+    
+    // Traductions
+    const translations = {
+        'fr': {
+            'dashboard': 'Tableau de bord',
+            'patients': 'Patients',
+            'reports': 'Rapports',
+            'documents': 'Documents',
+            'users': 'Utilisateurs',
+            'settings': 'Paramètres',
+            'profile': 'Profil',
+            'logout': 'Déconnexion'
+        },
+        'ar': {
+            'dashboard': 'لوحة التحكم',
+            'patients': 'المرضى',
+            'reports': 'التقارير',
+            'documents': 'الوثائق',
+            'users': 'المستخدمون',
+            'settings': 'الإعدادات',
+            'profile': 'الملف الشخصي',
+            'logout': 'تسجيل الخروج'
+        }
+    };
+    
+    // Appliquer les traductions si disponibles
+    if (translations[language]) {
+        applyTranslations(translations[language]);
+        console.log('Traductions appliquées pour:', language);
+    }
+}
+
+// Fonction pour appliquer les traductions
+function applyTranslations(translations) {
+    // Traduire les éléments de navigation
+    const elements = {
+        'dashboard': document.querySelector('a[href*="dashboard"]'),
+        'patients': document.querySelector('a[href*="patients"]'),
+        'reports': document.querySelector('a[href*="reports"]'),
+        'documents': document.querySelector('a[href*="documents"]'),
+        'users': document.querySelector('a[href*="users"]'),
+        'settings': document.querySelector('a[href*="settings"]'),
+        'profile': document.querySelector('a[href*="profile"]'),
+        'logout': document.querySelector('a[href*="logout"]')
+    };
+    
+    for (const [key, element] of Object.entries(elements)) {
+        if (element && translations[key]) {
+            element.textContent = translations[key];
+        }
+    }
+}
+
+// Fonction pour appliquer la taille de police
+function applyFontSize(fontSize) {
+    const sizes = {
+        'small': '14px',
+        'medium': '16px',
+        'large': '18px',
+        'extra-large': '20px'
+    };
+    
+    if (sizes[fontSize]) {
+        document.documentElement.style.fontSize = sizes[fontSize];
+        localStorage.setItem('font_size', fontSize);
+    }
+}
+
+// Fonction pour appliquer la densité d'affichage
+function applyDisplayDensity(density) {
+    const densities = {
+        'compact': '0.8rem',
+        'normal': '1rem',
+        'comfortable': '1.2rem'
+    };
+    
+    if (densities[density]) {
+        document.documentElement.style.setProperty('--spacing', densities[density]);
+        localStorage.setItem('display_density', density);
+    }
+}
+
+// Fonction pour appliquer les animations
+function applyAnimations(animations) {
+    const durations = {
+        'fast': '0.1s',
+        'normal': '0.3s',
+        'slow': '0.5s',
+        'disabled': '0s'
+    };
+    
+    if (durations[animations]) {
+        document.documentElement.style.setProperty('--transition-duration', durations[animations]);
+        localStorage.setItem('animations', animations);
+    }
+}
+
+// Fonction pour afficher une notification
+function showNotification(message, type = 'info') {
+    // Créer l'élément de notification
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    // Ajouter à la page
+    document.body.appendChild(notification);
+    
+    // Supprimer automatiquement après 5 secondes
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Fonction pour charger les paramètres sauvegardés
+function loadSettings() {
+    const savedSettings = localStorage.getItem('app_settings');
+    if (savedSettings) {
+        const settings = JSON.parse(savedSettings);
+        
+        // Remplir le formulaire avec les valeurs sauvegardées
+        Object.keys(settings).forEach(key => {
+            const element = document.querySelector(`[name="${key}"]`);
+            if (element) {
+                if (element.type === 'checkbox') {
+                    element.checked = settings[key] === 'on' || settings[key] === true;
+                } else {
+                    element.value = settings[key];
+                }
+            }
+        });
+        
+        // Appliquer les paramètres
+        applySettings(settings);
+    }
+}
+</script>
+
+<!-- CSS pour les thèmes -->
+<style>
+/* Thème clair (par défaut) */
+.light-theme {
+    --bg-color: #ffffff;
+    --text-color: #333333;
+    --card-bg: #ffffff;
+    --border-color: #dee2e6;
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --info-color: #17a2b8;
+}
+
+/* Thème sombre */
+.dark-theme {
+    --bg-color: #1a1a1a;
+    --text-color: #ffffff;
+    --card-bg: #2d2d2d;
+    --border-color: #404040;
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --info-color: #0dcaf0;
+}
+
+/* Application des variables CSS */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.card {
+    background-color: var(--card-bg);
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 16px 16px 0 0 !important;
+}
+
+.dark-theme .card-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    opacity: 0.9;
+}
+
+.form-control, .form-select {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+    outline: none;
+}
+
+.dark-theme .form-control, .dark-theme .form-select {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark-theme .form-control:focus, .dark-theme .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.2);
+}
+
+.navbar {
+    background-color: var(--card-bg) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar {
+    background-color: var(--card-bg) !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dark-theme .navbar {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dark-theme .sidebar {
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dropdown-menu {
+    background-color: var(--card-bg);
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.dropdown-item {
+    color: var(--text-color);
+    border-radius: 8px;
+    margin: 2px 8px;
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: var(--primary-color);
+    color: white;
+    transform: translateX(4px);
+}
+
+.alert {
+    background-color: var(--card-bg);
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.table {
+    color: var(--text-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > td {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.dark-theme .table-striped > tbody > tr:nth-of-type(odd) > td {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Animation de transition */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+}
+
+/* Styles pour les nouvelles fonctionnalités */
+.form-section {
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: none;
+    background: rgba(0, 123, 255, 0.03);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.form-section h3 {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(0, 123, 255, 0.1);
+    padding-bottom: 0.5rem;
+}
+
+.form-label {
+    font-weight: 500;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+}
+
+.text-muted {
+    color: var(--secondary-color) !important;
+    opacity: 0.8;
+}
+
+.form-check-label {
+    color: var(--text-color);
+}
+
+/* Styles pour les notifications */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    min-width: 300px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+}
+
+/* Styles pour les icônes de langue */
+.language-flag {
+    font-size: 1.2em;
+    margin-right: 0.5rem;
+}
+
+/* Styles pour les switchs */
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Styles pour les sélecteurs */
+.form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23666' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+.dark-theme .form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ccc' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+}
+
+/* Suppression complète des artefacts visuels */
+.form-select {
+    outline: none !important;
+    box-shadow: none !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.form-select:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.form-select:active {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.form-select:focus-visible {
+    outline: none !important;
+}
+
+/* Suppression des pseudo-éléments qui peuvent causer des artefacts */
+.form-select::before,
+.form-select::after {
+    display: none !important;
+    content: none !important;
+}
+
+/* Suppression des bordures et ombres par défaut */
+.form-select,
+.form-select:focus,
+.form-select:active,
+.form-select:hover {
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.form-select:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15) !important;
+}
+
+/* Thème sombre */
+.dark-theme .form-select,
+.dark-theme .form-select:focus,
+.dark-theme .form-select:active,
+.dark-theme .form-select:hover {
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.dark-theme .form-select:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.2) !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .form-section {
+        padding: 1rem;
+    }
+    
+    .notification {
+        left: 10px;
+        right: 10px;
+        min-width: auto;
+    }
+}
+</style>
+{% endblock %}
